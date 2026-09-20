@@ -1,0 +1,1085 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Protótipo navegável do Passa a Chave: os dois lados do app que cruza rotas entre quem bebeu e tem carro e quem vai para o mesmo lado e topa dirigir.">
+<style>
+  html{color-scheme:light dark}
+  :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  body{margin:0;font:14px system-ui,sans-serif;background:#fafaf9}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>Passa a Chave Navegável</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Azeret+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --palco:#E7EBF1; --palco-txt:#54627A; --palco-borda:#C6D0DE;
+
+  /* o aplicativo tem tema noturno fixo: é usado de madrugada */
+  --app-bg:#0F1725; --app-sheet:#151F2E; --app-raise:#1C2839; --app-fundo:#111A28;
+  --app-line:#293649; --app-text:#EDF2F8; --app-muted:#92A0B5;
+  --app-amber:#F2A33C; --app-amber-ink:#17202D; --app-green:#57C596; --app-red:#EF6B5E;
+
+  --fd:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --fb:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fm:'Azeret Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--palco:#06090F;--palco-txt:#7C8AA0;--palco-borda:#1B2636}
+}
+:root[data-theme="dark"]{--palco:#06090F;--palco-txt:#7C8AA0;--palco-borda:#1B2636}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--palco);color:var(--app-text);font-family:var(--fb);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+
+/* ============ palco e aparelho ============ */
+.palco{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.aparelho{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--app-bg);position:relative}
+.legenda{display:none}
+@media (min-width:620px) and (min-height:700px){
+  .palco{padding:22px 16px}
+  .aparelho{width:390px;height:min(844px,100%);border-radius:46px;border:11px solid #05080D;box-shadow:0 44px 90px -44px rgba(0,0,0,.75)}
+  .legenda{display:block;margin:16px 0 0;color:var(--palco-txt);font-size:12.5px;text-align:center}
+  .legenda b{font-weight:600;color:var(--palco-txt)}
+}
+
+.statusbar{flex:none;display:flex;justify-content:space-between;align-items:center;padding:10px 22px 4px;font-family:var(--fm);font-size:12px;font-weight:500;position:relative;z-index:7}
+.sb-icons{display:flex;align-items:center;gap:6px}
+.entalhe{position:absolute;top:0;left:50%;transform:translateX(-50%);width:108px;height:24px;background:#05080D;border-radius:0 0 15px 15px;z-index:8;display:none}
+@media (min-width:620px) and (min-height:700px){.entalhe{display:block}}
+
+.nav{flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 10px;min-height:48px}
+.nav-tit{flex:1;min-width:0;font-family:var(--fd);font-weight:700;font-size:15px;letter-spacing:-.01em;display:flex;align-items:center;gap:7px}
+.nav-tit svg{width:15px;height:15px;color:var(--app-amber);flex:none}
+.iconbtn{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;border:1px solid var(--app-line);background:var(--app-raise);color:var(--app-text);cursor:pointer;padding:0;flex:none}
+.iconbtn svg{width:16px;height:16px}
+.avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--app-amber);color:var(--app-amber-ink);font-family:var(--fd);font-weight:700;font-size:13px;flex:none}
+
+/* ============ telas ============ */
+.telas{position:relative;flex:1;min-height:0}
+.tela{position:absolute;inset:0;display:flex;flex-direction:column}
+.tela.frente{animation:entraDir .26s cubic-bezier(.2,.75,.3,1)}
+.tela.tras{animation:entraEsq .26s cubic-bezier(.2,.75,.3,1)}
+@keyframes entraDir{from{transform:translateX(30px);opacity:0}}
+@keyframes entraEsq{from{transform:translateX(-30px);opacity:0}}
+
+.rolagem{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#2B3A50 transparent}
+.rolagem:has(.folha){background:var(--app-sheet)}
+.rolagem::-webkit-scrollbar{width:5px}
+.rolagem::-webkit-scrollbar-thumb{background:#2B3A50;border-radius:99px}
+.corpo{padding:0 16px 26px;display:flex;flex-direction:column;gap:15px}
+.corpo--topo{padding-top:4px}
+.folha{background:var(--app-sheet);border-radius:22px 22px 0 0;margin-top:-16px;position:relative;z-index:3;padding:14px 16px 26px;display:flex;flex-direction:column;gap:15px}
+h2.tit{font-family:var(--fd);font-weight:700;font-size:18px;line-height:1.26;letter-spacing:-.015em;margin:0;text-wrap:balance}
+.eyebrow{font-family:var(--fm);font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--app-muted);margin:0 0 8px}
+
+/* ============ abertura ============ */
+.abertura{padding:14px 16px 26px;display:flex;flex-direction:column;gap:16px;min-height:100%}
+.marca{display:flex;align-items:center;gap:9px}
+.marca svg{width:24px;height:24px;color:var(--app-amber);flex:none}
+.marca b{font-family:var(--fd);font-weight:800;font-size:23px;letter-spacing:-.02em}
+.abertura h1{font-family:var(--fd);font-weight:800;font-size:26px;line-height:1.14;letter-spacing:-.03em;margin:6px 0 0;text-wrap:balance}
+.abertura .sub{margin:0;color:var(--app-muted);font-size:14px;line-height:1.5;text-wrap:pretty}
+.escolhas{display:flex;flex-direction:column;gap:10px;margin-top:2px}
+.escolha{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--app-line);background:var(--app-raise);color:var(--app-text);border-radius:18px;padding:15px 14px;cursor:pointer;font-family:var(--fb);transition:border-color .16s,background .16s}
+.escolha:hover{border-color:var(--app-amber);background:rgba(242,163,60,.08)}
+.escolha-ico{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:var(--app-fundo);color:var(--app-amber);flex:none}
+.escolha-ico svg{width:21px;height:21px}
+.escolha-txt{flex:1;min-width:0}
+.escolha-txt b{display:block;font-family:var(--fd);font-weight:700;font-size:15px;letter-spacing:-.01em}
+.escolha-txt span{display:block;font-size:12px;color:var(--app-muted);line-height:1.4;margin-top:2px}
+.escolha>svg:last-child{width:15px;height:15px;color:var(--app-muted);flex:none}
+.passos{list-style:none;margin:4px 0 0;padding:15px 0 0;border-top:1px solid var(--app-line);display:flex;flex-direction:column;gap:10px}
+.passos li{display:flex;align-items:flex-start;gap:11px;font-size:12.5px;line-height:1.4;color:var(--app-muted)}
+.passos li>b{font-family:var(--fm);font-size:10.5px;font-weight:600;color:var(--app-amber);flex:none;width:17px;padding-top:1px}
+.passos li em{font-style:normal;font-weight:600;color:var(--app-text)}
+.abertura-pe{margin:auto 0 0;padding-top:14px;border-top:1px solid var(--app-line);font-size:11.5px;color:var(--app-muted);display:flex;align-items:center;gap:7px}
+.abertura-pe i{width:6px;height:6px;border-radius:50%;background:var(--app-green);flex:none;font-style:normal}
+
+/* ============ mapa ============ */
+.mapa{position:relative;flex:none;aspect-ratio:320/150;max-height:188px;overflow:hidden;background:#0C1320}
+.mapa svg{display:block;width:100%;height:100%}
+.mapa-aviso{position:absolute;left:12px;bottom:22px;max-width:calc(100% - 24px);display:flex;align-items:center;gap:7px;background:rgba(15,23,37,.9);border:1px solid var(--app-line);border-radius:999px;padding:5px 11px 5px 8px;font-size:11.5px;color:var(--app-text)}
+.mapa-aviso i{width:7px;height:7px;border-radius:50%;background:var(--app-green);flex:none;font-style:normal;box-shadow:0 0 0 3px rgba(87,197,150,.22)}
+.rota-anim{animation:corre 2.4s linear infinite}
+@keyframes corre{to{stroke-dashoffset:-28}}
+.pulso{transform-box:fill-box;transform-origin:center;animation:pulsa 2.2s ease-out infinite}
+@keyframes pulsa{0%{transform:scale(.55);opacity:.7}100%{transform:scale(1.9);opacity:0}}
+
+/* ============ campos de rota ============ */
+.rota{display:grid;grid-template-columns:14px 1fr;gap:0 10px;background:var(--app-raise);border:1px solid var(--app-line);border-radius:14px;padding:12px}
+.rota-marca{display:grid;place-items:center;padding-top:5px}
+.rota-marca i{width:9px;height:9px;border-radius:50%;background:var(--app-amber);display:block}
+.rota-marca.fim i{border-radius:2px;background:transparent;border:2.5px solid var(--app-amber)}
+.rota-fio{width:2px;background:repeating-linear-gradient(to bottom,#3A4A63 0 3px,transparent 3px 7px);justify-self:center;min-height:18px;margin:3px 0}
+.rota p{margin:0;font-size:13px;font-weight:600;line-height:1.3}
+.rota p span{display:block;font-weight:400;font-size:11.5px;color:var(--app-muted);margin-top:1px}
+.rota-pe{grid-column:1/-1;display:flex;align-items:flex-start;gap:7px;margin-top:11px;padding-top:10px;border-top:1px solid var(--app-line);font-size:11.5px;line-height:1.4;color:var(--app-muted)}
+.rota-pe svg{width:13px;height:13px;color:var(--app-amber);flex:none;margin-top:1px}
+.rota-pe b{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+
+/* ============ escolhas em lista e fichas ============ */
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{display:block;cursor:pointer}
+.opt input{position:absolute;opacity:0;width:0;height:0}
+.opt-body{display:flex;align-items:center;gap:10px;border:1px solid var(--app-line);background:var(--app-raise);border-radius:14px;padding:10px 12px;transition:border-color .16s,background .16s}
+.opt input:checked+.opt-body{border-color:var(--app-amber);background:rgba(242,163,60,.09)}
+.opt input:focus-visible+.opt-body{outline:2px solid var(--app-amber);outline-offset:2px}
+.opt-ico{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--app-fundo);color:var(--app-muted);flex:none}
+.opt input:checked+.opt-body .opt-ico{color:var(--app-amber)}
+.opt-ico svg{width:15px;height:15px}
+.opt-txt{flex:1;min-width:0}
+.opt-nome{display:block;font-weight:600;font-size:13.5px}
+.opt-sub{display:block;font-size:11.5px;line-height:1.32;color:var(--app-muted);text-wrap:pretty}
+.opt-meta{font-family:var(--fm);font-size:11px;color:var(--app-muted);text-align:right;line-height:1.45;flex:none;font-variant-numeric:tabular-nums}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{cursor:pointer}
+.chip input{position:absolute;opacity:0;width:0;height:0}
+.chip span{display:inline-block;border:1px solid var(--app-line);background:var(--app-fundo);color:var(--app-muted);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:500;transition:border-color .16s,color .16s,background .16s}
+.chip input:checked+span{border-color:var(--app-amber);background:rgba(242,163,60,.12);color:var(--app-amber)}
+.chip input:focus-visible+span{outline:2px solid var(--app-amber);outline-offset:2px}
+.chips-lab{font-size:11.5px;color:var(--app-muted);margin:0 0 7px}
+
+/* ============ carro ============ */
+.carro{display:flex;align-items:center;gap:11px;flex-wrap:wrap;background:var(--app-raise);border:1px solid var(--app-line);border-radius:14px;padding:11px 12px}
+.placa{display:inline-flex;align-items:stretch;border-radius:5px;overflow:hidden;border:1.5px solid #46586F;background:#E9EDF3;flex:none}
+.placa .br{display:grid;place-items:center;background:#15409B;color:#fff;font-family:var(--fm);font-size:8px;font-weight:600;padding:0 5px}
+.placa .num{font-family:var(--fm);font-weight:600;font-size:13px;letter-spacing:.09em;color:#101827;padding:4px 8px}
+.carro-mod{margin:0;font-size:13px}
+.carro-mod span{display:block;font-size:11.5px;color:var(--app-muted)}
+
+/* ============ resumo de preço ============ */
+.resumo{border:1px solid var(--app-line);border-radius:16px;padding:13px;background:var(--app-raise)}
+.resumo-topo{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.resumo-topo span{font-size:12.5px;color:var(--app-muted)}
+.resumo-topo b{font-family:var(--fd);font-weight:800;font-size:25px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.resumo-linha{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.resumo-nota{margin:10px 0 0;padding-top:9px;border-top:1px solid var(--app-line);font-size:11.5px;color:var(--app-muted);line-height:1.4}
+.resumo-nota b{font-family:var(--fm);font-weight:500;color:var(--app-green)}
+
+.met{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:4px 7px;font-size:10.5px;background:var(--app-fundo);border:1px solid var(--app-line);color:var(--app-muted)}
+.met b{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+.met.bom{border-color:rgba(87,197,150,.4)}
+.met.bom b{color:var(--app-green)}
+.met.ruim{border-color:rgba(239,107,94,.35)}
+.met.ruim b{color:var(--app-red)}
+
+/* ============ cartões de pedido ============ */
+.peds{display:flex;flex-direction:column;gap:8px}
+.ped{display:block;cursor:pointer}
+.ped input{position:absolute;opacity:0;width:0;height:0}
+.ped-body{display:block;border:1px solid var(--app-line);background:var(--app-raise);border-radius:15px;padding:11px 12px;transition:border-color .16s,background .16s}
+.ped input:checked+.ped-body{border-color:var(--app-amber);background:rgba(242,163,60,.09)}
+.ped input:focus-visible+.ped-body{outline:2px solid var(--app-amber);outline-offset:2px}
+.ped-topo{display:flex;align-items:center;gap:9px}
+.ped-ini{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#22324A;color:var(--app-text);font-family:var(--fd);font-weight:700;font-size:12.5px;flex:none}
+.ped input:checked+.ped-body .ped-ini{background:var(--app-amber);color:var(--app-amber-ink)}
+.ped-nome{flex:1;min-width:0}
+.ped-nome b{display:block;font-size:13.5px;font-weight:600}
+.ped-nome span{display:block;font-size:11px;color:var(--app-muted);font-family:var(--fm)}
+.ped-valor{flex:none;text-align:right}
+.ped-valor b{display:block;font-family:var(--fm);font-weight:600;font-size:14.5px;color:var(--app-amber);font-variant-numeric:tabular-nums;line-height:1.15}
+.ped-valor span{display:block;font-size:9.5px;color:var(--app-muted);margin-top:1px}
+.ped-trecho{display:block;margin:9px 0 0;font-size:11.5px;color:var(--app-muted);line-height:1.4}
+.ped-trecho b{color:var(--app-amber);font-weight:600}
+.mets{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+
+/* ============ sobriedade ============ */
+.sopro{display:flex;align-items:flex-start;gap:10px;cursor:pointer;border:1px solid rgba(87,197,150,.35);background:rgba(87,197,150,.06);border-radius:15px;padding:12px}
+.sopro input{position:absolute;opacity:0;width:0;height:0}
+.sopro-cx{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;border:1.5px solid #46586F;background:var(--app-fundo);flex:none;margin-top:1px;transition:background .16s,border-color .16s}
+.sopro-cx svg{width:12px;height:12px;color:var(--app-amber-ink);opacity:0;transition:opacity .16s}
+.sopro input:checked+.sopro-cx{background:var(--app-green);border-color:var(--app-green)}
+.sopro input:checked+.sopro-cx svg{opacity:1}
+.sopro input:focus-visible+.sopro-cx{outline:2px solid var(--app-green);outline-offset:2px}
+.sopro-txt{font-size:11.5px;line-height:1.45;color:var(--app-muted)}
+.sopro-txt b{color:var(--app-text);font-weight:600}
+
+/* ============ ganho mútuo ============ */
+.ganho{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--app-line);border-radius:16px;overflow:hidden;background:var(--app-raise)}
+.ganho-col{padding:12px 11px;min-width:0}
+.ganho-col+.ganho-col{border-left:1px solid var(--app-line);background:rgba(242,163,60,.05)}
+.ganho-quem{margin:0;font-family:var(--fm);font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--app-muted)}
+.ganho-oque{margin:4px 0 8px;font-family:var(--fd);font-weight:700;font-size:13px;line-height:1.25;letter-spacing:-.01em;text-wrap:balance}
+.ganho-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.ganho-col li{font-size:11px;line-height:1.35;color:var(--app-muted);padding-left:11px;position:relative}
+.ganho-col li::before{content:"";position:absolute;left:0;top:6px;width:4px;height:4px;border-radius:50%;background:var(--app-amber)}
+.ganho-col li b{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+
+/* ============ corrida ============ */
+.eta{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--app-raise);border:1px solid var(--app-line);border-radius:16px;padding:12px 14px}
+.eta-l{min-width:0}
+.eta-l p{margin:0;font-size:12px;color:var(--app-muted)}
+.eta-l h3{margin:1px 0 0;font-family:var(--fd);font-weight:700;font-size:16px;letter-spacing:-.01em}
+.eta-r{text-align:right;flex:none}
+.eta-r b{display:block;font-family:var(--fm);font-weight:600;font-size:20px;color:var(--app-amber);font-variant-numeric:tabular-nums;line-height:1.1}
+.eta-r small{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--app-muted);font-family:var(--fm)}
+
+.etapas{display:flex;margin:0;padding:0;list-style:none}
+.etapas li{flex:1;text-align:center;position:relative;font-size:10px;color:var(--app-muted);padding-top:16px;line-height:1.25}
+.etapas li::before{content:"";position:absolute;top:3px;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:#28364A;border:1.5px solid #28364A}
+.etapas li::after{content:"";position:absolute;top:7px;left:50%;width:100%;height:1.5px;background:#28364A}
+.etapas li:last-child::after{display:none}
+.etapas li.on{color:var(--app-amber);font-weight:600}
+.etapas li.on::before{background:var(--app-amber);border-color:var(--app-amber);box-shadow:0 0 0 3px rgba(242,163,60,.18)}
+.etapas li.done::before{background:var(--app-green);border-color:var(--app-green)}
+.etapas li.done::after{background:var(--app-green)}
+
+.pessoa{display:flex;align-items:center;gap:12px;background:var(--app-raise);border:1px solid var(--app-line);border-radius:16px;padding:13px}
+.pessoa-foto{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#22324A;color:var(--app-text);font-family:var(--fd);font-weight:700;font-size:17px;flex:none;box-shadow:0 0 0 2px var(--app-amber)}
+.pessoa-info{flex:1;min-width:0}
+.pessoa-info h4{margin:0;font-family:var(--fd);font-weight:700;font-size:15.5px;letter-spacing:-.01em}
+.pessoa-nota{display:flex;align-items:center;gap:5px;margin:2px 0 0;font-size:12px;color:var(--app-muted)}
+.pessoa-nota svg{width:12px;height:12px;color:var(--app-amber);flex:none}
+.pessoa-nota b{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+.selos{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.selo{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--app-line);border-radius:999px;padding:3px 8px;font-size:10.5px;color:var(--app-muted)}
+.selo svg{width:11px;height:11px;color:var(--app-green);flex:none}
+
+.codigo{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px dashed #3C4E69;border-radius:16px;padding:12px 14px;background:rgba(242,163,60,.05)}
+.codigo p{margin:0;font-size:11.5px;color:var(--app-muted);line-height:1.4;max-width:20ch}
+.codigo p b{color:var(--app-text);font-weight:600}
+.digitos{display:flex;gap:5px;flex:none}
+.digitos span{display:grid;place-items:center;width:30px;height:36px;border-radius:8px;background:var(--app-fundo);border:1px solid var(--app-line);font-family:var(--fm);font-weight:600;font-size:17px;color:var(--app-amber)}
+
+.acoes{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.acao{display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--app-line);background:var(--app-raise);color:var(--app-text);border-radius:14px;padding:11px 6px;font-family:var(--fb);font-size:11.5px;font-weight:500;cursor:pointer;transition:border-color .16s,background .16s}
+.acao:hover{border-color:var(--app-amber);background:rgba(242,163,60,.08)}
+.acao svg{width:17px;height:17px;color:var(--app-amber)}
+
+.seguranca{display:flex;flex-direction:column;gap:9px;border:1px solid var(--app-line);border-radius:16px;padding:12px 13px;background:var(--app-raise)}
+.seg-li{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--app-muted);line-height:1.4}
+.seg-li svg{width:14px;height:14px;flex:none;margin-top:1px;color:var(--app-green)}
+.seg-li b{color:var(--app-text);font-weight:600}
+.seg-li .mono{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+
+/* ============ estados de espera e sucesso ============ */
+.buscando{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:40px 24px;min-height:100%}
+.radar{position:relative;width:74px;height:74px;display:grid;place-items:center;flex:none}
+.radar i{position:absolute;inset:0;border-radius:50%;border:2px solid var(--app-amber);opacity:0;animation:radar 2.1s ease-out infinite}
+.radar i:nth-child(2){animation-delay:.7s}
+.radar i:nth-child(3){animation-delay:1.4s}
+@keyframes radar{0%{transform:scale(.3);opacity:.75}100%{transform:scale(1);opacity:0}}
+.radar svg{width:28px;height:28px;color:var(--app-amber);position:relative}
+.buscando h3{margin:0;font-family:var(--fd);font-weight:700;font-size:18px;letter-spacing:-.015em;text-wrap:balance}
+.buscando p{margin:0;font-size:13px;color:var(--app-muted);max-width:30ch;line-height:1.45}
+
+.sucesso{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:26px 8px 8px}
+.sucesso-ico{display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:rgba(87,197,150,.14);border:1.5px solid var(--app-green);color:var(--app-green);flex:none}
+.sucesso-ico svg{width:28px;height:28px}
+.sucesso h3{margin:0;font-family:var(--fd);font-weight:700;font-size:19px;letter-spacing:-.015em;text-wrap:balance}
+.sucesso p{margin:0;font-size:13px;color:var(--app-muted);line-height:1.5;max-width:32ch;text-wrap:pretty}
+
+.nota{display:flex;align-items:flex-start;gap:8px;margin:0;font-size:11.5px;line-height:1.45;color:var(--app-muted)}
+.nota svg{width:13px;height:13px;flex:none;margin-top:2px}
+
+/* ============ barra de ação ============ */
+.pe{flex:none;background:var(--app-sheet);border-top:1px solid var(--app-line);padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:9px}
+.cta{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-radius:15px;background:var(--app-amber);color:var(--app-amber-ink);font-family:var(--fd);font-weight:700;font-size:15.5px;padding:15px 18px;cursor:pointer;transition:filter .16s,background .16s,color .16s}
+.cta:hover{filter:brightness(1.06)}
+.cta--so{justify-content:center}
+.cta:disabled{background:var(--app-raise);color:#5D6B80;cursor:not-allowed}
+.cta:disabled:hover{filter:none}
+.cta-preco{font-family:var(--fm);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.cta2{width:100%;border:1px solid var(--app-line);background:transparent;color:var(--app-text);border-radius:15px;padding:12px;font-family:var(--fb);font-size:13.5px;font-weight:600;cursor:pointer}
+.cta2:hover{background:var(--app-raise)}
+.cta2--risco{color:var(--app-red)}
+.cta2--risco:hover{background:rgba(239,107,94,.1)}
+.pe-nota{margin:0;text-align:center;font-size:11.5px;color:var(--app-muted);min-height:16px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="regiao">
+      <rect x="-20" y="-20" width="360" height="190" fill="#0C1320"></rect>
+      <g stroke="#16283F" fill="none" stroke-linecap="round">
+        <path d="M100 -6 C94 28 92 56 98 82 C104 106 114 126 120 150" stroke-width="7"></path>
+        <path d="M-8 38 C34 34 70 28 98 18" stroke-width="5.5"></path>
+      </g>
+      <g stroke="#1C2839" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M306 120 L244 104 L200 90 L154 78 L112 68" stroke-width="7"></path>
+        <path d="M106 66 L60 58 L14 52" stroke-width="5"></path>
+        <path d="M166 80 L174 40 L180 6" stroke-width="4"></path>
+        <path d="M240 106 L256 70 L264 32" stroke-width="3.5"></path>
+        <path d="M40 92 L64 118 L120 130" stroke-width="3.5"></path>
+      </g>
+      <g fill="#2E405B" font-family="Azeret Mono, monospace" font-size="7" letter-spacing="1.1">
+        <text x="12" y="44">BUTANTÃ</text>
+        <text x="110" y="102">PINHEIROS</text>
+        <text x="188" y="108">IPIRANGA</text>
+        <text x="214" y="127">SANTO ANDRÉ</text>
+      </g>
+    </g>
+    <g id="pct-chave"><circle cx="8.6" cy="8.6" r="4.4" fill="none" stroke="currentColor" stroke-width="2.2"></circle><path d="M11.8 11.8 20 20M17.6 17.4l-1.9 1.9M20 20l-1.9 1.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></g>
+    <g id="pct-check"><path d="m3.5 8.4 3 3 6-6.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path></g>
+    <g id="pct-estrela"><path d="M8 1.6l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.4l-3.8 2 .7-4.3-3.1-3 4.3-.6z" fill="currentColor"></path></g>
+    <g id="pct-escudo"><path d="M8 1.8 13.2 4v4.1c0 3-2.1 5.2-5.2 6.1-3.1-.9-5.2-3.1-5.2-6.1V4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path><path d="m5.8 8.1 1.6 1.6 3-3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></g>
+    <g id="pct-relogio"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M8 4.8V8l2.2 1.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></g>
+  </defs>
+</svg>
+
+<div class="palco">
+  <div class="aparelho">
+    <div class="entalhe" aria-hidden="true"></div>
+
+    <div class="statusbar">
+      <span>01:26</span>
+      <span class="sb-icons" aria-hidden="true">
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect y="7.5" width="3" height="3.5" rx="1"></rect><rect x="4.6" y="5" width="3" height="6" rx="1"></rect><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"></rect><rect x="13.8" width="3" height="11" rx="1"></rect></svg>
+        <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.2 3.7a9.2 9.2 0 0 1 12.6 0"></path><path d="M3.8 6.4a5.6 5.6 0 0 1 7.4 0"></path><path d="M7.5 9.4h.01"></path></svg>
+        <svg width="24" height="11" viewBox="0 0 24 11"><rect x=".6" y=".6" width="19.8" height="9.8" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".5"></rect><rect x="2.3" y="2.3" width="12" height="6.4" rx="1.8" fill="currentColor"></rect><path d="M22.2 3.8v3.4a2.1 2.1 0 0 0 0-3.4z" fill="currentColor" opacity=".5"></path></svg>
+      </span>
+    </div>
+
+    <header class="nav" id="nav" hidden>
+      <button class="iconbtn" id="btn-voltar" type="button" aria-label="Voltar">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 3.5 5 8l4.5 4.5"></path></svg>
+      </button>
+      <span class="nav-tit" id="nav-tit"></span>
+      <button class="iconbtn" id="btn-inicio" type="button" aria-label="Voltar ao início do protótipo">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path></svg>
+      </button>
+    </header>
+
+    <div class="telas">
+
+      <!-- ===================== INÍCIO ===================== -->
+      <section class="tela" id="t-inicio" aria-label="Início">
+        <div class="rolagem">
+          <div class="abertura">
+            <div class="marca">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#pct-chave"></use></svg>
+              <b>Passa a Chave</b>
+            </div>
+            <h1>Quem já vai pro seu lado dirige o seu carro.</h1>
+            <p class="sub">Você bebeu e o carro está com você. Outra pessoa vai pro mesmo destino e não tem como voltar. O app cruza as duas rotas e fecha o par.</p>
+
+            <div class="escolhas">
+              <button class="escolha" type="button" data-ir="t-a1">
+                <span class="escolha-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10l-1 6.5a4 4 0 0 1-8 0z"></path><path d="M12 13.5V20M8.5 20h7"></path></svg>
+                </span>
+                <span class="escolha-txt">
+                  <b>Bebi e não posso dirigir</b>
+                  <span>Meu carro está aqui comigo e eu preciso chegar em casa</span>
+                </span>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3.5 4.5 4.5L6 12.5"></path></svg>
+              </button>
+
+              <button class="escolha" type="button" data-ir="t-b1">
+                <span class="escolha-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="3.2"></circle><path d="M12 3v5.8M4.2 16.5l5-2.8M19.8 16.5l-5-2.8" stroke-linecap="round"></path></svg>
+                </span>
+                <span class="escolha-txt">
+                  <b>Vou pro mesmo lado</b>
+                  <span>Posso dirigir o carro de alguém e ganhar a carona de volta</span>
+                </span>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3.5 4.5 4.5L6 12.5"></path></svg>
+              </button>
+            </div>
+
+            <ol class="passos">
+              <li><b>01</b><span>Quem vai dirigir <em>declara a rota</em> e o horário de saída.</span></li>
+              <li><b>02</b><span>O app <em>cruza as duas rotas</em> e mostra o quanto cada pedido coincide.</span></li>
+              <li><b>03</b><span>Um dirige o carro do outro. <em>Os dois chegam em casa.</em></span></li>
+            </ol>
+
+            <p class="abertura-pe"><i></i>São Paulo · quinta a domingo, das 19h às 05h · 214 pares fechados em setembro</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== A1 — PEDIR ===================== -->
+      <section class="tela" id="t-a1" hidden aria-label="Pedir motorista">
+        <div class="rolagem">
+          <div class="mapa">
+            <svg viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa de São Paulo com o trajeto de Santo André até o Butantã">
+              <use href="#regiao"></use>
+              <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" fill="none" stroke="#F2A33C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".85"></path>
+              <circle cx="64" cy="57" r="6.5" fill="#0F1725" stroke="#F2A33C" stroke-width="3"></circle>
+              <circle cx="268" cy="114" r="13" fill="#F2A33C" opacity=".2" class="pulso"></circle>
+              <circle cx="268" cy="114" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
+            </svg>
+            <span class="mapa-aviso"><i></i>9 pessoas saindo do ABC pro seu lado agora</span>
+          </div>
+
+          <div class="folha">
+            <section>
+              <p class="eyebrow">De onde</p>
+              <div class="rota">
+                <span class="rota-marca"><i></i></span>
+                <p>Av. Portugal, 480<span>Vila Assunção, Santo André · confirmado por GPS</span></p>
+              </div>
+            </section>
+
+            <section>
+              <p class="eyebrow">Para onde</p>
+              <div class="opts">
+                <label class="opt">
+                  <input type="radio" name="destino" id="d1" checked data-km="34.2" data-min="48" data-app="118">
+                  <span class="opt-body">
+                    <span class="opt-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path><path d="M6.4 13.5V9.6h3.2v3.9"></path></svg></span>
+                    <span class="opt-txt"><span class="opt-nome">Casa</span><span class="opt-sub">Av. Corifeu de Azevedo Marques, 3.400 · Butantã</span></span>
+                    <span class="opt-meta">34,2 km<br>48 min</span>
+                  </span>
+                </label>
+                <label class="opt">
+                  <input type="radio" name="destino" id="d2" data-km="31.8" data-min="45" data-app="112">
+                  <span class="opt-body">
+                    <span class="opt-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="5.4" r="2.8"></circle><path d="M2.8 13.6c.6-2.8 2.7-4.2 5.2-4.2s4.6 1.4 5.2 4.2"></path></svg></span>
+                    <span class="opt-txt"><span class="opt-nome">Casa da Bia</span><span class="opt-sub">R. Girassol, 640 · Vila Madalena</span></span>
+                    <span class="opt-meta">31,8 km<br>45 min</span>
+                  </span>
+                </label>
+                <label class="opt">
+                  <input type="radio" name="destino" id="d3" data-km="22.6" data-min="34" data-app="86">
+                  <span class="opt-body">
+                    <span class="opt-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 13.5v-11h10v11"></path><path d="M1.5 13.5h13"></path><path d="M6 5.6h1.2M8.8 5.6H10M6 8.2h1.2M8.8 8.2H10"></path></svg></span>
+                    <span class="opt-txt"><span class="opt-nome">Hotel</span><span class="opt-sub">Al. Santos, 1.437 · Jardins</span></span>
+                    <span class="opt-meta">22,6 km<br>34 min</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            <section>
+              <p class="eyebrow">Seu carro</p>
+              <div class="carro">
+                <span class="placa"><span class="br">BR</span><span class="num">FKR2C19</span></span>
+                <p class="carro-mod">Honda Civic 2021<span>Prata · câmbio automático</span></p>
+              </div>
+            </section>
+
+            <div class="resumo">
+              <div class="resumo-topo"><span>Você paga</span><b id="a1-total">R$ 46,23</b></div>
+              <div class="resumo-linha">
+                <span class="met">fixa <b>R$ 24,00</b></span>
+                <span class="met"><b id="a1-km">34,2 km</b> × <b>R$ 0,65</b></span>
+              </div>
+              <p class="resumo-nota">Sozinha de app essa volta sairia <b id="a1-app">R$ 118</b> — e o carro dormiria na Vila Assunção.</p>
+            </div>
+          </div>
+        </div>
+        <div class="pe">
+          <button class="cta" type="button" data-ir="t-a2">
+            <span>Procurar quem vai pro meu lado</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3.5 4.5 4.5L6 12.5"></path></svg>
+          </button>
+          <p class="pe-nota">Estimativa <b id="a1-pe">R$ 46,23</b> · você só paga quando o par fechar.</p>
+        </div>
+      </section>
+
+      <!-- ===================== A2 — MATCH ===================== -->
+      <section class="tela" id="t-a2" hidden aria-label="Procurando par">
+        <div class="rolagem" id="a2-rol">
+          <div class="buscando" id="a2-buscando" aria-live="polite">
+            <span class="radar" aria-hidden="true"><i></i><i></i><i></i>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="3.2"></circle><path d="M12 3v5.8M4.2 16.5l5-2.8M19.8 16.5l-5-2.8"></path></svg>
+            </span>
+            <h3 id="a2-tit">Cruzando com quem sai do ABC agora</h3>
+            <p id="a2-txt">Procurando alguém que já vá para o Butantã e possa dirigir o seu Civic.</p>
+          </div>
+
+          <div id="a2-achou" hidden>
+            <div class="mapa">
+              <svg viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa com o trecho comum entre as duas rotas">
+                <use href="#regiao"></use>
+                <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" stroke="#F2A33C" stroke-width="4.5" opacity=".9"></path>
+                  <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" stroke="#FFE2B4" stroke-width="2" stroke-dasharray="6 8" class="rota-anim"></path>
+                  <path d="M288 122 L268 114" stroke="#93A0B4" stroke-width="2" stroke-dasharray="4 4"></path>
+                  <path d="M64 57 L46 50" stroke="#93A0B4" stroke-width="2" stroke-dasharray="4 4"></path>
+                </g>
+                <circle cx="46" cy="50" r="4" fill="none" stroke="#93A0B4" stroke-width="2"></circle>
+                <circle cx="64" cy="57" r="6.5" fill="#0F1725" stroke="#F2A33C" stroke-width="3"></circle>
+                <circle cx="268" cy="114" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
+                <circle cx="288" cy="122" r="6.5" fill="#EDF2F8" stroke="#F2A33C" stroke-width="2.5"></circle>
+              </svg>
+              <span class="mapa-aviso"><i></i>34,2 km · 48 min · 94% em comum</span>
+            </div>
+
+            <div class="folha">
+              <h2 class="tit">Marcos vai pro Butantã e topa dirigir.</h2>
+
+              <div class="pessoa">
+                <div class="pessoa-foto" aria-hidden="true">MS</div>
+                <div class="pessoa-info">
+                  <h4>Marcos Serrano</h4>
+                  <span class="pessoa-nota">
+                    <svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-estrela"></use></svg>
+                    <span><b>4,91</b> · 46 caronas dirigindo</span>
+                  </span>
+                  <span class="selos">
+                    <span class="selo"><svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-check"></use></svg>Sopro negativo às 01h19</span>
+                    <span class="selo"><svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-check"></use></svg>CNH B desde 2012</span>
+                    <span class="selo"><svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-check"></use></svg>Antecedentes checados</span>
+                  </span>
+                </div>
+              </div>
+
+              <section>
+                <p class="eyebrow">Por que esse par existe</p>
+                <div class="ganho">
+                  <div class="ganho-col">
+                    <p class="ganho-quem">Você</p>
+                    <p class="ganho-oque">Chega em casa dentro do seu próprio carro</p>
+                    <ul>
+                      <li>Paga <b>R$ 46,23</b> no lugar de <b>R$ 118</b></li>
+                      <li>O Civic amanhece na sua garagem</li>
+                      <li>Ninguém dirige depois de beber</li>
+                    </ul>
+                  </div>
+                  <div class="ganho-col">
+                    <p class="ganho-quem">Marcos</p>
+                    <p class="ganho-oque">Volta pro Butantã, onde já estava indo</p>
+                    <ul>
+                      <li>Deixa de gastar <b>R$ 118</b> na volta</li>
+                      <li>Recebe <b>R$ 32,36</b> pela direção</li>
+                      <li>Desce a <b>0,9 km</b> de casa</li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <p class="nota">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-relogio"></use></svg>
+                Ele está a 1,1 km do seu carro e vem a pé. Chega em cerca de 13 minutos.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pe" id="a2-pe" hidden>
+          <button class="cta" type="button" data-ir="t-a3">
+            <span>Confirmar o par</span>
+            <span class="cta-preco">R$ 46,23</span>
+          </button>
+          <button class="cta2" type="button" data-rebuscar>Ver outra pessoa</button>
+        </div>
+      </section>
+
+      <!-- ===================== A3 — CORRIDA ===================== -->
+      <section class="tela" id="t-a3" hidden aria-label="Corrida em andamento">
+        <div class="rolagem">
+          <div class="mapa">
+            <svg viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa com Marcos indo a pé até o carro">
+              <use href="#regiao"></use>
+              <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" stroke="#F2A33C" stroke-width="4.5" opacity=".9"></path>
+                <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" stroke="#FFE2B4" stroke-width="2" stroke-dasharray="6 8" class="rota-anim"></path>
+                <path d="M288 122 L268 114" stroke="#93A0B4" stroke-width="2.5" stroke-dasharray="4 4"></path>
+              </g>
+              <circle cx="64" cy="57" r="6.5" fill="#0F1725" stroke="#F2A33C" stroke-width="3"></circle>
+              <circle cx="268" cy="114" r="13" fill="#F2A33C" opacity=".2" class="pulso"></circle>
+              <circle cx="268" cy="114" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
+              <circle cx="288" cy="122" r="6.5" fill="#EDF2F8" stroke="#F2A33C" stroke-width="2.5"></circle>
+            </svg>
+            <span class="mapa-aviso"><i></i>Marcos a 1,1 km · vindo a pé</span>
+          </div>
+
+          <div class="folha">
+            <div class="eta">
+              <div class="eta-l">
+                <p>Marcos aceitou e vem a pé</p>
+                <h3 id="eta-frase">Chega em instantes</h3>
+              </div>
+              <div class="eta-r"><b id="eta-relogio">13:00</b><small>restantes</small></div>
+            </div>
+
+            <ol class="etapas" id="etapas">
+              <li class="on">Vindo</li><li>Encontro</li><li>Em viagem</li><li>Chegou</li>
+            </ol>
+
+            <div class="codigo">
+              <p>Mostre estes dígitos ao Marcos <b>antes</b> de entregar a chave.</p>
+              <span class="digitos" aria-label="Código de início: 4 4 8 2"><span>4</span><span>4</span><span>8</span><span>2</span></span>
+            </div>
+
+            <section>
+              <p class="eyebrow">Seu carro</p>
+              <div class="carro">
+                <span class="placa"><span class="br">BR</span><span class="num">FKR2C19</span></span>
+                <p class="carro-mod">Honda Civic 2021 prata<span>Av. Portugal, 480 · Vila Assunção</span></p>
+              </div>
+            </section>
+
+            <div class="acoes">
+              <button class="acao" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M5.6 2.4 7.2 5.6 5.5 7.3a8.6 8.6 0 0 0 3.2 3.2l1.7-1.7 3.2 1.6v2.4c0 .6-.5 1.1-1.1 1-6-.6-9.4-4-10-10 0-.6.4-1.1 1-1.1z"></path></svg>Ligar</button>
+              <button class="acao" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2.4 3.6h11.2v8H7l-3.2 2.6V11.6H2.4z"></path></svg>Mensagem</button>
+              <button class="acao" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="3.6" r="2"></circle><circle cx="4" cy="8" r="2"></circle><circle cx="12" cy="12.4" r="2"></circle><path d="m5.8 7 4.4-2.4M5.8 9l4.4 2.4"></path></svg>Compartilhar</button>
+            </div>
+
+            <div class="seguranca">
+              <span class="seg-li"><svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-escudo"></use></svg><span>Seguro ativo · apólice <span class="mono">PC-88421</span>, condutor eventual, até a Av. Corifeu.</span></span>
+              <span class="seg-li"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M8 14.2s5.2-3.4 5.2-7a5.2 5.2 0 1 0-10.4 0c0 3.6 5.2 7 5.2 7z"></path><circle cx="8" cy="7.1" r="1.9"></circle></svg><span><b>Bia Machado</b> acompanha o trajeto ao vivo desde as 01h25.</span></span>
+              <span class="seg-li"><svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-relogio"></use></svg><span>Fora da rota combinada por mais de <span class="mono">3 min</span>, a central liga para você.</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="pe">
+          <button class="cta2 cta2--risco" type="button" data-inicio>Cancelar o par · grátis por mais 1 min</button>
+        </div>
+      </section>
+
+      <!-- ===================== B1 — MINHA ROTA ===================== -->
+      <section class="tela" id="t-b1" hidden aria-label="Minha rota">
+        <div class="rolagem">
+          <div class="mapa">
+            <svg viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa com a rota declarada de Santo André até o Butantã">
+              <use href="#regiao"></use>
+              <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" fill="none" stroke="#F2A33C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".85"></path>
+              <path d="M64 57 L46 50" fill="none" stroke="#93A0B4" stroke-width="2" stroke-dasharray="4 4"></path>
+              <circle cx="46" cy="50" r="4" fill="none" stroke="#93A0B4" stroke-width="2"></circle>
+              <circle cx="64" cy="57" r="6.5" fill="#0F1725" stroke="#F2A33C" stroke-width="3"></circle>
+              <circle cx="288" cy="122" r="13" fill="#F2A33C" opacity=".2" class="pulso"></circle>
+              <circle cx="288" cy="122" r="6.5" fill="#EDF2F8" stroke="#F2A33C" stroke-width="2.5"></circle>
+            </svg>
+            <span class="mapa-aviso"><i></i>3 pedidos abertos nesse eixo</span>
+          </div>
+
+          <div class="folha">
+            <h2 class="tit">Para onde você vai embora hoje?</h2>
+
+            <div class="rota">
+              <span class="rota-marca"><i></i></span>
+              <p>Rua Oliveira Lima, 1.220<span>Centro, Santo André · você está aqui</span></p>
+              <span class="rota-fio"></span>
+              <span></span>
+              <span class="rota-marca fim"><i></i></span>
+              <p>Rua Alvarenga, 2.100<span>Butantã · sua casa</span></p>
+              <div class="rota-pe">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-relogio"></use></svg>
+                <span>Sua volta de app hoje sairia <b>R$ 118</b>.</span>
+              </div>
+            </div>
+
+            <section>
+              <p class="chips-lab">Quando você pretende sair</p>
+              <div class="chips">
+                <label class="chip"><input type="radio" name="saida" id="s1" checked><span>Agora</span></label>
+                <label class="chip"><input type="radio" name="saida" id="s2"><span>Por volta de 01h30</span></label>
+                <label class="chip"><input type="radio" name="saida" id="s3"><span>Por volta de 02h30</span></label>
+              </div>
+            </section>
+
+            <p class="nota">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.2"></circle><path d="M8 7.4v4M8 4.9h.01" stroke-linecap="round"></path></svg>
+              Quanto mais cedo você declara a rota, mais pedidos o app consegue cruzar com ela. Você pode recusar todos sem penalidade.
+            </p>
+          </div>
+        </div>
+        <div class="pe">
+          <button class="cta" type="button" data-ir="t-b2">
+            <span>Ver pedidos na minha rota</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3.5 4.5 4.5L6 12.5"></path></svg>
+          </button>
+          <p class="pe-nota">Dirigir o carro de outra pessoa não usa o seu seguro.</p>
+        </div>
+      </section>
+
+      <!-- ===================== B2 — PEDIDOS ===================== -->
+      <section class="tela" id="t-b2" hidden aria-label="Pedidos na sua rota">
+        <div class="rolagem">
+          <div class="mapa">
+            <svg viewBox="0 0 320 150" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa com três pedidos compatíveis na origem">
+              <use href="#regiao"></use>
+              <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" fill="none" stroke="#F2A33C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".85"></path>
+              <circle cx="64" cy="57" r="6.5" fill="#0F1725" stroke="#F2A33C" stroke-width="3"></circle>
+              <g fill="#F2A33C" opacity=".55">
+                <circle cx="268" cy="114" r="4.5"></circle>
+                <circle cx="281" cy="106" r="4.5"></circle>
+                <circle cx="257" cy="121" r="4.5"></circle>
+              </g>
+              <circle id="halo-sel" cx="268" cy="114" r="13" fill="#F2A33C" opacity=".2" class="pulso"></circle>
+              <circle id="dot-sel" cx="268" cy="114" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
+              <circle cx="288" cy="122" r="5.5" fill="#EDF2F8" stroke="#0F1725" stroke-width="2"></circle>
+            </svg>
+            <span class="mapa-aviso"><i></i>3 pedidos na sua rota agora</span>
+          </div>
+
+          <div class="folha">
+            <h2 class="tit">Escolha quem você leva.</h2>
+
+            <div class="peds">
+              <label class="ped">
+                <input type="radio" name="pedido" id="p-ju" checked
+                       data-nome="Juliana" data-ini="JR" data-valor="R$ 32,36" data-ate="1,1 km" data-pe="13 min"
+                       data-end="Av. Portugal, 480 · Vila Assunção" data-carro="Honda Civic 2021 prata"
+                       data-placa="FKR2C19" data-dest="Av. Corifeu, 3.400 · Butantã" data-km="34,2 km" data-sobra="0,9 km"
+                       data-cx="268" data-cy="114">
+                <span class="ped-body">
+                  <span class="ped-topo">
+                    <span class="ped-ini">JR</span>
+                    <span class="ped-nome"><b>Juliana R.</b><span>4,97 · 38 corridas</span></span>
+                    <span class="ped-valor"><b>R$ 32,36</b><span>+ carona</span></span>
+                  </span>
+                  <span class="ped-trecho">Av. Portugal, 480 · Vila Assunção <b>→</b> Av. Corifeu, 3.400 · Butantã</span>
+                  <span class="mets">
+                    <span class="met bom">coincide <b>94%</b></span>
+                    <span class="met bom">te deixa a <b>0,9 km</b> de casa</span>
+                    <span class="met">carro a <b>1,1 km</b></span>
+                    <span class="met">Civic · automático</span>
+                  </span>
+                </span>
+              </label>
+
+              <label class="ped">
+                <input type="radio" name="pedido" id="p-di"
+                       data-nome="Diego" data-ini="DM" data-valor="R$ 31,18" data-ate="2,3 km" data-pe="27 min"
+                       data-end="R. das Figueiras, 990 · Centro" data-carro="Fiat Argo 2022 branco"
+                       data-placa="GHT4B82" data-dest="R. Ministro Laudo, 210 · Vila Sônia" data-km="31,6 km" data-sobra="4,8 km"
+                       data-cx="281" data-cy="106">
+                <span class="ped-body">
+                  <span class="ped-topo">
+                    <span class="ped-ini">DM</span>
+                    <span class="ped-nome"><b>Diego M.</b><span>4,88 · 12 corridas</span></span>
+                    <span class="ped-valor"><b>R$ 31,18</b><span>+ carona</span></span>
+                  </span>
+                  <span class="ped-trecho">R. das Figueiras, 990 · Centro <b>→</b> R. Ministro Laudo, 210 · Vila Sônia</span>
+                  <span class="mets">
+                    <span class="met">coincide <b>81%</b></span>
+                    <span class="met">te deixa a <b>4,8 km</b> de casa</span>
+                    <span class="met">carro a <b>2,3 km</b></span>
+                    <span class="met">Argo · <b>manual</b></span>
+                  </span>
+                </span>
+              </label>
+
+              <label class="ped">
+                <input type="radio" name="pedido" id="p-pa"
+                       data-nome="Paula" data-ini="PV" data-valor="R$ 29,50" data-ate="0,6 km" data-pe="7 min"
+                       data-end="R. Campos Sales, 140 · Bairro Jardim" data-carro="VW Polo 2023 cinza"
+                       data-placa="SBQ7E04" data-dest="R. Mourato Coelho, 800 · Pinheiros" data-km="27,9 km" data-sobra="6,2 km"
+                       data-cx="257" data-cy="121">
+                <span class="ped-body">
+                  <span class="ped-topo">
+                    <span class="ped-ini">PV</span>
+                    <span class="ped-nome"><b>Paula V.</b><span>5,00 · 61 corridas</span></span>
+                    <span class="ped-valor"><b>R$ 29,50</b><span>+ carona</span></span>
+                  </span>
+                  <span class="ped-trecho">R. Campos Sales, 140 · Bairro Jardim <b>→</b> R. Mourato Coelho, 800 · Pinheiros</span>
+                  <span class="mets">
+                    <span class="met">coincide <b>72%</b></span>
+                    <span class="met ruim">te deixa a <b>6,2 km</b> de casa</span>
+                    <span class="met bom">carro a <b>0,6 km</b></span>
+                    <span class="met">Polo · automático</span>
+                  </span>
+                </span>
+              </label>
+            </div>
+
+            <section>
+              <p class="eyebrow">Antes de aceitar</p>
+              <label class="sopro">
+                <input type="checkbox" id="sobrio" checked>
+                <span class="sopro-cx"><svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-check"></use></svg></span>
+                <span class="sopro-txt"><b>Não bebi hoje e estou em condições de dirigir.</b> Fica registrado com data e hora. Denúncia confirmada encerra a conta.</span>
+              </label>
+            </section>
+          </div>
+        </div>
+        <div class="pe">
+          <button class="cta" id="b2-cta" type="button" data-ir="t-b3">
+            <span id="b2-rotulo">Aceitar · Juliana</span>
+            <span class="cta-preco" id="b2-valor">R$ 32,36</span>
+          </button>
+          <p class="pe-nota" id="b2-nota">Você anda 1,1 km até o carro · recebe no Pix ao fim da corrida</p>
+        </div>
+      </section>
+
+      <!-- ===================== B3 — ATÉ O CARRO ===================== -->
+      <section class="tela" id="t-b3" hidden aria-label="A caminho do carro">
+        <div class="rolagem">
+          <div class="corpo corpo--topo" id="b3-ir">
+            <div class="eta">
+              <div class="eta-l">
+                <p id="b3-quem">Juliana está esperando</p>
+                <h3>Vá até o carro</h3>
+              </div>
+              <div class="eta-r"><b id="b3-ate">1,1 km</b><small id="b3-pe">13 min a pé</small></div>
+            </div>
+
+            <ol class="etapas">
+              <li class="done">Aceito</li><li class="on">Indo até o carro</li><li>Chave</li><li>Em viagem</li>
+            </ol>
+
+            <section>
+              <p class="eyebrow">O carro que você vai dirigir</p>
+              <div class="carro">
+                <span class="placa"><span class="br">BR</span><span class="num" id="b3-placa">FKR2C19</span></span>
+                <p class="carro-mod"><span id="b3-carro">Honda Civic 2021 prata</span><span id="b3-end">Av. Portugal, 480 · Vila Assunção</span></p>
+              </div>
+            </section>
+
+            <div class="codigo">
+              <p>Peça os <b>4 dígitos</b> no celular dela antes de pegar a chave.</p>
+              <span class="digitos" aria-hidden="true"><span>?</span><span>?</span><span>?</span><span>?</span></span>
+            </div>
+
+            <div class="seguranca">
+              <span class="seg-li"><svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-escudo"></use></svg><span>Enquanto você dirige, vale a apólice <span class="mono">PC-88421</span> da corrida — não o seu seguro.</span></span>
+              <span class="seg-li"><svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pct-relogio"></use></svg><span>Destino combinado: <b id="b3-dest">Av. Corifeu, 3.400 · Butantã</b>. Sair da rota aciona a central.</span></span>
+            </div>
+
+            <p class="nota">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.2"></circle><path d="M8 7.4v4M8 4.9h.01" stroke-linecap="round"></path></svg>
+              Se ela não estiver em condições de confirmar o código, não inicie a corrida — avise a central pelo botão de ajuda.
+            </p>
+          </div>
+
+          <div class="corpo corpo--topo" id="b3-ok" hidden>
+            <div class="sucesso">
+              <span class="sucesso-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"></path></svg>
+              </span>
+              <h3>Chave recebida. Boa viagem.</h3>
+              <p id="b3-res">Você dirige 34,2 km até o Butantã, desce a 0,9 km de casa e recebe R$ 32,36.</p>
+            </div>
+
+            <div class="ganho">
+              <div class="ganho-col">
+                <p class="ganho-quem">Você</p>
+                <p class="ganho-oque">Volta pra casa sem pagar nada</p>
+                <ul>
+                  <li>Economiza <b>R$ 118</b> da própria volta</li>
+                  <li>Recebe <b id="b3-g1">R$ 32,36</b></li>
+                </ul>
+              </div>
+              <div class="ganho-col">
+                <p class="ganho-quem" id="b3-g2">Juliana</p>
+                <p class="ganho-oque">Chega em casa dentro do próprio carro</p>
+                <ul>
+                  <li>Paga <b>R$ 46,23</b> em vez de <b>R$ 118</b></li>
+                  <li>Não dirige depois de beber</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pe" id="b3-pe1">
+          <button class="cta cta--so" id="b3-cheguei" type="button">Cheguei ao carro</button>
+          <p class="pe-nota">O código só aparece quando vocês dois estiverem no carro.</p>
+        </div>
+        <div class="pe" id="b3-pe2" hidden>
+          <button class="cta cta--so" type="button" data-inicio>Recomeçar o protótipo</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+  <p class="legenda">Protótipo navegável — toque nos botões. <b>Abra no celular para a experiência real.</b></p>
+</div>
+
+<script>
+(function () {
+  var nav = document.getElementById('nav');
+  var navTit = document.getElementById('nav-tit');
+  var btnVoltar = document.getElementById('btn-voltar');
+  var btnInicio = document.getElementById('btn-inicio');
+
+  var TITULOS = {
+    't-inicio': '',
+    't-a1': 'Pedir motorista',
+    't-a2': 'Seu par',
+    't-a3': 'Par #8F2C',
+    't-b1': 'Minha rota',
+    't-b2': 'Pedidos na sua rota',
+    't-b3': 'A caminho do carro'
+  };
+
+  var pilha = ['t-inicio'];
+  var reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function mostrar(id, tras) {
+    var atual = document.querySelector('.tela:not([hidden])');
+    if (atual) { atual.hidden = true; atual.classList.remove('frente', 'tras'); }
+
+    var nova = document.getElementById(id);
+    nova.hidden = false;
+    if (!reduzir) {
+      void nova.offsetWidth;
+      nova.classList.add(tras ? 'tras' : 'frente');
+    }
+    var rol = nova.querySelector('.rolagem');
+    if (rol) { rol.scrollTop = 0; }
+
+    nav.hidden = (id === 't-inicio');
+    navTit.textContent = TITULOS[id] || '';
+    btnVoltar.hidden = (id === 't-inicio');
+
+    if (id === 't-a2') { buscar(); }
+    if (id === 't-b3') { prepararB3(); }
+  }
+
+  function avancar(id) { pilha.push(id); mostrar(id, false); }
+  function voltar() {
+    if (pilha.length < 2) { return; }
+    pilha.pop();
+    mostrar(pilha[pilha.length - 1], true);
+  }
+  function inicio() { pilha = ['t-inicio']; mostrar('t-inicio', true); }
+
+  document.addEventListener('click', function (e) {
+    var alvo = e.target.closest('[data-ir],[data-inicio],[data-rebuscar]');
+    if (!alvo) { return; }
+    if (alvo.hasAttribute('data-inicio')) { inicio(); return; }
+    if (alvo.hasAttribute('data-rebuscar')) { buscar(); return; }
+    if (alvo.disabled) { return; }
+    avancar(alvo.getAttribute('data-ir'));
+  });
+  btnVoltar.addEventListener('click', voltar);
+  btnInicio.addEventListener('click', inicio);
+
+  /* ---------- A1: preço ---------- */
+  var a1Total = document.getElementById('a1-total');
+  var a1Km = document.getElementById('a1-km');
+  var a1App = document.getElementById('a1-app');
+
+  function brl(n) { return 'R$ ' + n.toFixed(2).replace('.', ','); }
+
+  function recalcular() {
+    var d = document.querySelector('input[name="destino"]:checked');
+    var km = parseFloat(d.getAttribute('data-km'));
+    var total = brl(24 + km * 0.65);
+    a1Total.textContent = total;
+    document.getElementById('a1-pe').textContent = total;
+    a1Km.textContent = km.toFixed(1).replace('.', ',') + ' km';
+    a1App.textContent = 'R$ ' + d.getAttribute('data-app');
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="destino"]'), function (el) {
+    el.addEventListener('change', recalcular);
+  });
+  recalcular();
+
+  /* ---------- A2: busca ---------- */
+  var a2Busca = document.getElementById('a2-buscando');
+  var a2Achou = document.getElementById('a2-achou');
+  var a2Pe = document.getElementById('a2-pe');
+  var a2Tit = document.getElementById('a2-tit');
+  var a2Txt = document.getElementById('a2-txt');
+  var timers = [];
+
+  function buscar() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    a2Busca.hidden = false;
+    a2Achou.hidden = true;
+    a2Pe.hidden = true;
+    a2Tit.textContent = 'Cruzando com quem sai do ABC agora';
+    a2Txt.textContent = 'Procurando alguém que já vá para o Butantã e possa dirigir o seu Civic.';
+
+    timers.push(setTimeout(function () {
+      a2Tit.textContent = '3 rotas compatíveis';
+      a2Txt.textContent = 'Comparando o trecho em comum e onde cada pessoa termina a noite.';
+    }, 1300));
+
+    timers.push(setTimeout(function () {
+      a2Busca.hidden = true;
+      a2Achou.hidden = false;
+      a2Pe.hidden = false;
+    }, 2600));
+  }
+
+  /* ---------- A3: contagem ---------- */
+  var relogio = document.getElementById('eta-relogio');
+  var frase = document.getElementById('eta-frase');
+  var etapas = document.getElementById('etapas').children;
+  var restam = 780;
+
+  function pintarEta() {
+    if (restam > 0) {
+      var m = Math.floor(restam / 60), s = restam % 60;
+      relogio.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      frase.textContent = 'Chega em ' + (m > 0 ? m + ' min' : s + ' s');
+    } else {
+      relogio.textContent = '00:00';
+      frase.textContent = 'Marcos chegou · confira o código';
+      etapas[0].className = 'done';
+      etapas[1].className = 'on';
+    }
+  }
+  pintarEta();
+  setInterval(function () { if (restam > 0) { restam--; pintarEta(); } }, 1000);
+
+  /* ---------- B2: escolha do pedido ---------- */
+  var b2Cta = document.getElementById('b2-cta');
+  var b2Rotulo = document.getElementById('b2-rotulo');
+  var b2Valor = document.getElementById('b2-valor');
+  var b2Nota = document.getElementById('b2-nota');
+  var sobrio = document.getElementById('sobrio');
+  var dotSel = document.getElementById('dot-sel');
+  var haloSel = document.getElementById('halo-sel');
+
+  function pedido() { return document.querySelector('input[name="pedido"]:checked'); }
+
+  function atualizarB2() {
+    var p = pedido();
+    b2Rotulo.textContent = 'Aceitar · ' + p.getAttribute('data-nome');
+    b2Valor.textContent = p.getAttribute('data-valor');
+    dotSel.setAttribute('cx', p.getAttribute('data-cx'));
+    dotSel.setAttribute('cy', p.getAttribute('data-cy'));
+    haloSel.setAttribute('cx', p.getAttribute('data-cx'));
+    haloSel.setAttribute('cy', p.getAttribute('data-cy'));
+    porteira();
+  }
+
+  function porteira() {
+    b2Cta.disabled = !sobrio.checked;
+    b2Nota.textContent = sobrio.checked
+      ? 'Você anda ' + pedido().getAttribute('data-ate') + ' até o carro · recebe no Pix ao fim da corrida'
+      : 'Confirme a declaração de sobriedade para aceitar um pedido.';
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="pedido"]'), function (el) {
+    el.addEventListener('change', atualizarB2);
+  });
+  sobrio.addEventListener('change', porteira);
+  atualizarB2();
+
+  /* ---------- B3: até o carro ---------- */
+  var b3Ir = document.getElementById('b3-ir');
+  var b3Ok = document.getElementById('b3-ok');
+  var b3Pe1 = document.getElementById('b3-pe1');
+  var b3Pe2 = document.getElementById('b3-pe2');
+
+  function prepararB3() {
+    var p = pedido();
+    b3Ir.hidden = false;
+    b3Ok.hidden = true;
+    b3Pe1.hidden = false;
+    b3Pe2.hidden = true;
+
+    document.getElementById('b3-quem').textContent = p.getAttribute('data-nome') + ' está esperando';
+    document.getElementById('b3-ate').textContent = p.getAttribute('data-ate');
+    document.getElementById('b3-pe').textContent = p.getAttribute('data-pe') + ' a pé';
+    document.getElementById('b3-placa').textContent = p.getAttribute('data-placa');
+    document.getElementById('b3-carro').textContent = p.getAttribute('data-carro');
+    document.getElementById('b3-end').textContent = p.getAttribute('data-end');
+    document.getElementById('b3-dest').textContent = p.getAttribute('data-dest');
+    document.getElementById('b3-res').textContent =
+      'Você dirige ' + p.getAttribute('data-km') + ' até ' + p.getAttribute('data-dest').split(' · ')[1] +
+      ', desce a ' + p.getAttribute('data-sobra') + ' de casa e recebe ' + p.getAttribute('data-valor') + '.';
+    document.getElementById('b3-g1').textContent = p.getAttribute('data-valor');
+    document.getElementById('b3-g2').textContent = p.getAttribute('data-nome');
+  }
+
+  document.getElementById('b3-cheguei').addEventListener('click', function () {
+    b3Ir.hidden = true;
+    b3Ok.hidden = false;
+    b3Pe1.hidden = true;
+    b3Pe2.hidden = false;
+    document.querySelector('#t-b3 .rolagem').scrollTop = 0;
+  });
+})();
+</script>
+</body>
+</html>
