@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Protótipo de app em que um motorista avaliado dirige o carro do próprio cliente depois que ele bebeu. Fase 1: São Paulo.">
+<style>
+  html{color-scheme:light dark}
+  :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  body{margin:0;font:14px system-ui,sans-serif;background:#fafaf9}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>Passa a Chave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Azeret+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* ============ tokens da página ============ */
+:root{
+  --bg:#E7EBF1;
+  --bg-2:#F8F9FC;
+  --text:#101827;
+  --muted:#54627A;
+  --line:#C6D0DE;
+  --line-soft:#D9E0EA;
+  --accent:#A3560C;
+  --glow:rgba(242,163,60,.20);
+  --phone-shadow:0 34px 76px -36px rgba(12,24,44,.55);
+
+  /* ---- tokens do aplicativo: tema noturno fixo, é a cara do produto ---- */
+  --app-bg:#0F1725;
+  --app-sheet:#151F2E;
+  --app-raise:#1C2839;
+  --app-line:#293649;
+  --app-text:#EDF2F8;
+  --app-muted:#92A0B5;
+  --app-amber:#F2A33C;
+  --app-amber-ink:#17202D;
+  --app-green:#57C596;
+  --app-red:#EF6B5E;
+  --app-bezel:#04070C;
+
+  --fd:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --fb:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fm:'Azeret Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#080D15;
+    --bg-2:#101826;
+    --text:#E8EDF5;
+    --muted:#94A1B6;
+    --line:#202D40;
+    --line-soft:#18212F;
+    --accent:#F2A33C;
+    --glow:rgba(242,163,60,.11);
+    --phone-shadow:0 34px 84px -30px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#080D15;
+  --bg-2:#101826;
+  --text:#E8EDF5;
+  --muted:#94A1B6;
+  --line:#202D40;
+  --line-soft:#18212F;
+  --accent:#F2A33C;
+  --glow:rgba(242,163,60,.11);
+  --phone-shadow:0 34px 84px -30px rgba(0,0,0,.9);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background-color:var(--bg);
+  background-image:radial-gradient(1100px 440px at 50% -150px,var(--glow),transparent 72%);
+  background-repeat:no-repeat;
+  color:var(--text);
+  font-family:var(--fb);
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:34px 56px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+
+/* ============ cabeçalho ============ */
+.masthead{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px 26px;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:22px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand svg{width:26px;height:26px;color:var(--accent);flex:none}
+.brand b{font-family:var(--fd);font-weight:800;font-size:26px;letter-spacing:-.02em}
+.mast-copy{max-width:min(44ch,100%)}
+.mast-copy p{margin:8px 0 0;color:var(--muted);font-size:15px;text-wrap:pretty}
+.city{display:inline-flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--bg-2)}
+.city i{width:6px;height:6px;border-radius:50%;background:var(--accent);font-style:normal;flex:none}
+
+/* ============ palco dos aparelhos ============ */
+.stage{display:flex;flex-wrap:wrap;gap:40px 44px;justify-content:center;align-items:flex-start;margin:44px 0 0;padding:0}
+.slot{margin:0;width:340px;max-width:100%}
+.slot-cap{display:flex;align-items:baseline;gap:10px;margin:0 0 14px;padding-left:4px}
+.slot-num{font-family:var(--fm);font-size:12px;font-weight:600;color:var(--accent)}
+.slot-name{font-family:var(--fd);font-weight:700;font-size:16px;letter-spacing:-.01em}
+.slot-note{margin:0;padding-left:4px;padding-top:14px;color:var(--muted);font-size:13.5px;text-wrap:pretty}
+
+.phone{width:100%;background:var(--app-bezel);border:1px solid #1b2433;border-radius:46px;padding:11px;box-shadow:var(--phone-shadow)}
+.screen{position:relative;height:664px;border-radius:36px;overflow:hidden;background:var(--app-bg);color:var(--app-text);display:flex;flex-direction:column;font-size:14px}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:108px;height:24px;background:var(--app-bezel);border-radius:0 0 15px 15px;z-index:6}
+
+/* ---- barra de status ---- */
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:9px 20px 3px;font-family:var(--fm);font-size:12px;font-weight:500;color:var(--app-text);position:relative;z-index:7}
+.sb-icons{display:flex;align-items:center;gap:6px;color:var(--app-text)}
+
+/* ---- barra do app ---- */
+.appbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px 10px}
+.appbar-mid{display:flex;align-items:center;gap:7px;font-family:var(--fd);font-weight:700;font-size:14px;letter-spacing:-.01em}
+.appbar-mid svg{width:15px;height:15px;color:var(--app-amber)}
+.appbar-mid .ride-id{font-family:var(--fm);font-weight:500;font-size:12px;color:var(--app-muted);letter-spacing:0}
+.iconbtn{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;border:1px solid var(--app-line);background:var(--app-raise);color:var(--app-text);cursor:pointer;padding:0;flex:none}
+.iconbtn svg{width:16px;height:16px}
+.avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--app-amber);color:var(--app-amber-ink);font-family:var(--fd);font-weight:700;font-size:14px;flex:none}
+
+/* ---- mapa ---- */
+.map{position:relative;flex:none;overflow:hidden;background:#0C1320}
+.map svg{display:block;width:100%;height:100%}
+.map--band{height:128px}
+.map--tall{height:208px}
+.map-badge{position:absolute;left:12px;bottom:12px;display:flex;align-items:center;gap:7px;background:rgba(15,23,37,.88);border:1px solid var(--app-line);border-radius:999px;padding:5px 11px 5px 8px;font-size:11.5px;color:var(--app-text);backdrop-filter:blur(6px)}
+.map-badge i{width:7px;height:7px;border-radius:50%;background:var(--app-green);font-style:normal;flex:none;box-shadow:0 0 0 3px rgba(87,197,150,.22)}
+.map--tall .map-badge{bottom:auto;top:12px}
+.rota-anim{animation:corre 2.4s linear infinite}
+@keyframes corre{to{stroke-dashoffset:-28}}
+.pulso{transform-box:fill-box;transform-origin:center;animation:pulsa 2.2s ease-out infinite}
+@keyframes pulsa{0%{transform:scale(.55);opacity:.7}100%{transform:scale(1.9);opacity:0}}
+
+/* ---- área rolável ---- */
+.scroller{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);scrollbar-width:thin;scrollbar-color:#2B3A50 transparent}
+.scroller::-webkit-scrollbar{width:5px}
+.scroller::-webkit-scrollbar-thumb{background:#2B3A50;border-radius:99px}
+.sheet{background:var(--app-sheet);border-radius:22px 22px 0 0;margin-top:-16px;position:relative;z-index:3;padding:0 15px 30px;display:flex;flex-direction:column;gap:16px}
+.grabber{width:38px;height:4px;border-radius:99px;background:#33415A;margin:9px auto 3px}
+.sheet h2{font-family:var(--fd);font-weight:700;font-size:17px;line-height:1.28;letter-spacing:-.015em;margin:0;text-wrap:balance}
+
+.eyebrow{font-family:var(--fm);font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--app-muted);margin:0 0 8px}
+.block{display:block}
+
+/* ---- origem ---- */
+.origem{display:flex;align-items:flex-start;gap:10px;background:var(--app-raise);border:1px solid var(--app-line);border-radius:14px;padding:11px 12px}
+.origem .pin{width:11px;height:11px;border-radius:50%;background:var(--app-amber);margin-top:4px;flex:none;box-shadow:0 0 0 3px rgba(242,163,60,.2)}
+.origem .txt{flex:1;min-width:0}
+.origem .t1{display:block;margin:0;font-weight:600;font-size:14px}
+.origem .t2{display:block;margin:2px 0 0;font-size:12px;color:var(--app-muted)}
+.linkbtn{background:none;border:0;color:var(--app-amber);font-family:var(--fb);font-size:12.5px;font-weight:600;cursor:pointer;padding:2px 0;flex:none}
+
+/* ---- opções de destino ---- */
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{display:block;cursor:pointer}
+.opt input{position:absolute;opacity:0;width:0;height:0}
+.opt-body{display:flex;align-items:center;gap:10px;border:1px solid var(--app-line);background:var(--app-raise);border-radius:14px;padding:10px 12px;transition:border-color .16s,background .16s}
+.opt input:checked+.opt-body{border-color:var(--app-amber);background:rgba(242,163,60,.09)}
+.opt input:focus-visible+.opt-body{outline:2px solid var(--app-amber);outline-offset:2px}
+.opt-ico{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#111A28;color:var(--app-muted);flex:none}
+.opt input:checked+.opt-body .opt-ico{color:var(--app-amber)}
+.opt-ico svg{width:15px;height:15px}
+.opt-txt{flex:1;min-width:0}
+.opt-name{display:block;font-weight:600;font-size:13.5px}
+.opt-sub{display:block;font-size:11.5px;line-height:1.32;color:var(--app-muted);text-wrap:pretty}
+.opt-meta{font-family:var(--fm);font-size:11px;color:var(--app-muted);text-align:right;line-height:1.45;flex:none;font-variant-numeric:tabular-nums}
+
+/* ---- carro ---- */
+.carro{display:flex;align-items:center;gap:11px;flex-wrap:wrap;background:var(--app-raise);border:1px solid var(--app-line);border-radius:14px;padding:11px 12px}
+.placa{display:inline-flex;align-items:stretch;border-radius:5px;overflow:hidden;border:1.5px solid #46586F;background:#E9EDF3;flex:none}
+.placa .br{display:grid;place-items:center;background:#15409B;color:#fff;font-family:var(--fm);font-size:8px;font-weight:600;letter-spacing:.04em;padding:0 5px}
+.placa .num{font-family:var(--fm);font-weight:600;font-size:13px;letter-spacing:.09em;color:#101827;padding:4px 8px}
+.carro-mod{margin:0;font-size:13px;color:var(--app-text)}
+.carro-mod span{display:block;font-size:11.5px;color:var(--app-muted)}
+
+/* ---- fichas (chips) ---- */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.chip{cursor:pointer}
+.chip input{position:absolute;opacity:0;width:0;height:0}
+.chip span{display:inline-block;border:1px solid var(--app-line);background:#111A28;color:var(--app-muted);border-radius:999px;padding:6px 11px;font-size:12px;font-weight:500;transition:border-color .16s,color .16s,background .16s}
+.chip input:checked+span{border-color:var(--app-amber);background:rgba(242,163,60,.12);color:var(--app-amber)}
+.chip input:focus-visible+span{outline:2px solid var(--app-amber);outline-offset:2px}
+.chips-lab{font-size:11.5px;color:var(--app-muted);margin:11px 0 0}
+
+.ticket{margin-top:10px}
+.ticket label{display:block;font-size:11.5px;color:var(--app-muted);margin-bottom:5px}
+.ticket input{width:100%;border:1px solid var(--app-line);background:#111A28;color:var(--app-text);border-radius:11px;padding:9px 11px;font-family:var(--fm);font-size:13px;letter-spacing:.08em}
+.ticket input:focus-visible{outline:2px solid var(--app-amber);outline-offset:1px}
+
+.nota{display:flex;align-items:flex-start;gap:7px;margin:10px 0 0;font-size:11.5px;line-height:1.45;color:var(--app-muted)}
+.nota svg{width:13px;height:13px;flex:none;margin-top:2px}
+.nota--ok{color:var(--app-green)}
+.nota--ok b{color:var(--app-text);font-weight:600}
+
+/* ---- preço ---- */
+.lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.lines li{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;color:var(--app-muted)}
+.lines b{font-family:var(--fm);font-weight:500;color:var(--app-text);font-variant-numeric:tabular-nums;flex:none}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:11px;padding-top:11px;border-top:1px solid var(--app-line)}
+.total span{font-size:13px;color:var(--app-muted)}
+.total b{font-family:var(--fd);font-weight:800;font-size:23px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* ---- barra de ação ---- */
+.ctabar{flex:none;background:var(--app-sheet);border-top:1px solid var(--app-line);padding:12px 15px calc(15px + env(safe-area-inset-bottom,0px))}
+.cta{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-radius:15px;background:var(--app-amber);color:var(--app-amber-ink);font-family:var(--fd);font-weight:700;font-size:15.5px;padding:14px 18px;cursor:pointer;transition:filter .16s,background .16s,color .16s}
+.cta:hover{filter:brightness(1.06)}
+.cta[data-estado="buscando"]{background:var(--app-raise);color:var(--app-text);cursor:progress}
+.cta[data-estado="achou"]{background:var(--app-green);color:#08210F}
+.cta-preco{font-family:var(--fm);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.spin{width:15px;height:15px;border-radius:50%;border:2px solid rgba(237,242,248,.25);border-top-color:var(--app-amber);animation:gira .7s linear infinite;flex:none}
+@keyframes gira{to{transform:rotate(360deg)}}
+.cta-sub{margin:9px 0 0;text-align:center;font-size:11.5px;color:var(--app-muted);min-height:16px}
+
+/* ============ tela 2 ============ */
+.eta{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--app-raise);border:1px solid var(--app-line);border-radius:16px;padding:12px 14px}
+.eta-l{min-width:0}
+.eta-l p{margin:0;font-size:12px;color:var(--app-muted)}
+.eta-l h3{margin:1px 0 0;font-family:var(--fd);font-weight:700;font-size:16px;letter-spacing:-.01em}
+.eta-r{text-align:right;flex:none}
+.eta-r b{display:block;font-family:var(--fm);font-weight:600;font-size:22px;color:var(--app-amber);font-variant-numeric:tabular-nums;line-height:1.1}
+.eta-r small{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--app-muted);font-family:var(--fm)}
+.eta.flash{animation:flasha 1.1s ease-out}
+@keyframes flasha{0%{border-color:var(--app-amber);background:rgba(242,163,60,.2)}100%{border-color:var(--app-line);background:var(--app-raise)}}
+
+.etapas{display:flex;align-items:center;gap:0;margin:0;padding:0;list-style:none}
+.etapas li{flex:1;text-align:center;position:relative;font-size:10px;color:var(--app-muted);padding-top:16px;line-height:1.25}
+.etapas li::before{content:"";position:absolute;top:3px;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:#28364A;border:1.5px solid #28364A}
+.etapas li::after{content:"";position:absolute;top:7px;left:50%;width:100%;height:1.5px;background:#28364A}
+.etapas li:last-child::after{display:none}
+.etapas li.on{color:var(--app-amber);font-weight:600}
+.etapas li.on::before{background:var(--app-amber);border-color:var(--app-amber);box-shadow:0 0 0 3px rgba(242,163,60,.18)}
+.etapas li.done::before{background:var(--app-green);border-color:var(--app-green)}
+.etapas li.done::after{background:var(--app-green)}
+
+.motorista{display:flex;align-items:center;gap:12px;background:var(--app-raise);border:1px solid var(--app-line);border-radius:16px;padding:13px}
+.mot-foto{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#22324A;color:var(--app-text);font-family:var(--fd);font-weight:700;font-size:17px;flex:none;box-shadow:0 0 0 2px var(--app-amber)}
+.mot-info{flex:1;min-width:0}
+.mot-info h4{margin:0;font-family:var(--fd);font-weight:700;font-size:15.5px;letter-spacing:-.01em}
+.mot-info .nota-mot{display:flex;align-items:center;gap:5px;margin:2px 0 0;font-size:12px;color:var(--app-muted)}
+.mot-info .nota-mot svg{width:12px;height:12px;color:var(--app-amber)}
+.mot-info .nota-mot b{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+.selos{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.selo{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--app-line);border-radius:999px;padding:3px 8px;font-size:10.5px;color:var(--app-muted)}
+.selo svg{width:11px;height:11px;color:var(--app-green)}
+
+.codigo{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px dashed #3C4E69;border-radius:16px;padding:12px 14px;background:rgba(242,163,60,.05)}
+.codigo p{margin:0;font-size:11.5px;color:var(--app-muted);line-height:1.4;max-width:19ch}
+.codigo .digitos{display:flex;gap:5px;flex:none}
+.codigo .digitos span{display:grid;place-items:center;width:28px;height:34px;border-radius:8px;background:#111A28;border:1px solid var(--app-line);font-family:var(--fm);font-weight:600;font-size:16px;color:var(--app-amber)}
+
+.acoes{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.acao{display:flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--app-line);background:var(--app-raise);color:var(--app-text);border-radius:14px;padding:11px 6px;font-family:var(--fb);font-size:11.5px;font-weight:500;cursor:pointer;transition:border-color .16s,background .16s}
+.acao:hover{border-color:var(--app-amber);background:rgba(242,163,60,.08)}
+.acao svg{width:17px;height:17px;color:var(--app-amber)}
+
+.seguranca{display:flex;flex-direction:column;gap:9px;border:1px solid var(--app-line);border-radius:16px;padding:12px 13px;background:var(--app-raise)}
+.seg-li{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--app-muted);line-height:1.4}
+.seg-li svg{width:14px;height:14px;flex:none;margin-top:1px;color:var(--app-green)}
+.seg-li b{color:var(--app-text);font-weight:600}
+.seg-li .mono{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+
+.cancelar{width:100%;border:1px solid var(--app-line);background:transparent;color:var(--app-red);border-radius:14px;padding:11px;font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer}
+.cancelar:hover{background:rgba(239,107,94,.1)}
+
+/* ============ ficha de operação ============ */
+.ops{margin-top:62px;border-top:1px solid var(--line);padding-top:26px}
+.ops h2{font-family:var(--fd);font-weight:700;font-size:19px;letter-spacing:-.015em;margin:0 0 4px}
+.ops>p{margin:0 0 24px;color:var(--muted);font-size:14px;max-width:62ch;text-wrap:pretty}
+.ops-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px 32px;margin:0}
+.ops-item{border-top:1px solid var(--line-soft);padding-top:12px}
+.ops-item dt{font-family:var(--fm);font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:7px}
+.ops-item dd{margin:0;font-size:13.5px;line-height:1.52;color:var(--muted);text-wrap:pretty}
+.num{font-family:var(--fm);font-weight:500;color:var(--text);font-variant-numeric:tabular-nums}
+
+.rodape{margin-top:40px;padding-top:18px;border-top:1px solid var(--line-soft);color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+
+@media (max-width:420px){
+  .wrap{padding-block:26px 44px}
+  .brand b{font-size:23px}
+  .stage{gap:34px}
+  .screen{height:620px}
+  .acoes{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="malha">
+      <rect x="-20" y="-20" width="360" height="250" fill="#0C1320"></rect>
+      <g fill="#131D2C">
+        <rect x="4" y="26" width="102" height="50" rx="3"></rect>
+        <rect x="115" y="26" width="85" height="50" rx="3"></rect>
+        <rect x="209" y="26" width="112" height="50" rx="3"></rect>
+        <rect x="4" y="86" width="102" height="60" rx="3"></rect>
+        <rect x="115" y="86" width="85" height="60" rx="3"></rect>
+        <rect x="209" y="86" width="112" height="60" rx="3"></rect>
+        <rect x="4" y="156" width="102" height="56" rx="3"></rect>
+        <rect x="115" y="156" width="85" height="56" rx="3"></rect>
+        <rect x="209" y="156" width="112" height="56" rx="3"></rect>
+      </g>
+      <g stroke="#1C2839" fill="none" stroke-linecap="square">
+        <path d="M-20 81 H340" stroke-width="10"></path>
+        <path d="M110 -20 V230" stroke-width="10"></path>
+        <path d="M-20 151 H340" stroke-width="6"></path>
+        <path d="M204 -20 V230" stroke-width="6"></path>
+        <path d="M-20 21 H340" stroke-width="5"></path>
+      </g>
+      <path d="M-20 214 L96 118 L214 96 L340 58" stroke="#20304A" stroke-width="8" fill="none" stroke-linejoin="round"></path>
+      <text x="14" y="204" fill="#2E405B" font-family="Azeret Mono, monospace" font-size="9" letter-spacing="1.6">V. MADALENA</text>
+    </g>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="8.6" cy="8.6" r="4.4" stroke="currentColor" stroke-width="2"></circle><path d="M11.8 11.8 20 20M17.6 17.4l-1.9 1.9M20 20l-1.9 1.9" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+        <b>Passa a Chave</b>
+      </div>
+      <div class="mast-copy">
+        <p>Você bebeu, seu carro fica. Um motorista avaliado chega de patinete dobrável, guarda o patinete no porta-malas e leva você para casa <strong>no seu próprio carro</strong>.</p>
+      </div>
+    </div>
+    <span class="city"><i></i>São Paulo · fase 1</span>
+  </header>
+
+  <main class="stage">
+
+    <!-- ===================== TELA 1 ===================== -->
+    <figure class="slot">
+      <figcaption class="slot-cap"><span class="slot-num">01</span><span class="slot-name">Pedido</span></figcaption>
+
+      <div class="phone">
+        <div class="screen" id="tela-pedido">
+          <div class="notch"></div>
+
+          <div class="statusbar">
+            <span>23:47</span>
+            <span class="sb-icons">
+              <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect y="7.5" width="3" height="3.5" rx="1"></rect><rect x="4.6" y="5" width="3" height="6" rx="1"></rect><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"></rect><rect x="13.8" width="3" height="11" rx="1"></rect></svg>
+              <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1.2 3.7a9.2 9.2 0 0 1 12.6 0"></path><path d="M3.8 6.4a5.6 5.6 0 0 1 7.4 0"></path><path d="M7.5 9.4h.01"></path></svg>
+              <svg width="24" height="11" viewBox="0 0 24 11" aria-hidden="true"><rect x=".6" y=".6" width="19.8" height="9.8" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".5"></rect><rect x="2.3" y="2.3" width="13" height="6.4" rx="1.8" fill="currentColor"></rect><path d="M22.2 3.8v3.4a2.1 2.1 0 0 0 0-3.4z" fill="currentColor" opacity=".5"></path></svg>
+            </span>
+          </div>
+
+          <div class="appbar">
+            <button class="iconbtn" type="button" aria-label="Abrir menu"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h8"></path></svg></button>
+            <span class="appbar-mid">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="8.6" cy="8.6" r="4.4" stroke="currentColor" stroke-width="2.4"></circle><path d="M11.8 11.8 20 20M17.6 17.4l-1.9 1.9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>
+              Passa a Chave
+            </span>
+            <span class="avatar" aria-hidden="true">Í</span>
+          </div>
+
+          <div class="map map--band">
+            <svg viewBox="0 0 320 210" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa da Vila Madalena com motoristas disponíveis por perto">
+              <use href="#malha"></use>
+              <g fill="#F2A33C" opacity=".85">
+                <circle cx="176" cy="58" r="3.4"></circle>
+                <circle cx="52" cy="118" r="3.4"></circle>
+                <circle cx="238" cy="126" r="3.4"></circle>
+                <circle cx="132" cy="176" r="3.4"></circle>
+              </g>
+              <circle cx="104" cy="98" r="14" fill="#F2A33C" opacity=".22" class="pulso"></circle>
+              <circle cx="104" cy="98" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
+            </svg>
+            <span class="map-badge"><i></i>12 motoristas na Vila Madalena</span>
+          </div>
+
+          <div class="scroller">
+            <div class="sheet">
+              <div class="grabber"></div>
+              <h2>Boa noite, Ítalo. Quem leva você pra casa hoje?</h2>
+
+              <section class="block">
+                <p class="eyebrow">Origem</p>
+                <div class="origem">
+                  <span class="pin"></span>
+                  <span class="txt">
+                    <span class="t1">Rua Aspicuelta, 440</span>
+                    <span class="t2">Vila Madalena · confirmado por GPS</span>
+                  </span>
+                  <button class="linkbtn" type="button">Mudar</button>
+                </div>
+              </section>
+
+              <section class="block">
+                <p class="eyebrow">Destino</p>
+                <div class="opts">
+                  <label class="opt">
+                    <input type="radio" name="destino" id="dest-casa" value="casa" data-km="4.1" data-min="14" checked>
+                    <span class="opt-body">
+                      <span class="opt-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path><path d="M6.4 13.5V9.6h3.2v3.9"></path></svg></span>
+                      <span class="opt-txt">
+                        <span class="opt-name">Casa</span>
+                        <span class="opt-sub">R. Joaquim Antunes, 812 · Pinheiros</span>
+                      </span>
+                      <span class="opt-meta">4,1 km<br>14 min</span>
+                    </span>
+                  </label>
+                  <label class="opt">
+                    <input type="radio" name="destino" id="dest-bia" value="bia" data-km="6.8" data-min="21">
+                    <span class="opt-body">
+                      <span class="opt-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="5.4" r="2.8"></circle><path d="M2.8 13.6c.6-2.8 2.7-4.2 5.2-4.2s4.6 1.4 5.2 4.2"></path></svg></span>
+                      <span class="opt-txt">
+                        <span class="opt-name">Casa da Bia</span>
+                        <span class="opt-sub">R. Cardoso de Almeida, 1.140 · Perdizes</span>
+                      </span>
+                      <span class="opt-meta">6,8 km<br>21 min</span>
+                    </span>
+                  </label>
+                  <label class="opt">
+                    <input type="radio" name="destino" id="dest-hotel" value="hotel" data-km="9.3" data-min="27">
+                    <span class="opt-body">
+                      <span class="opt-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 13.5v-11h10v11"></path><path d="M1.5 13.5h13"></path><path d="M6 5.6h1.2M8.8 5.6H10M6 8.2h1.2M8.8 8.2H10"></path></svg></span>
+                      <span class="opt-txt">
+                        <span class="opt-name">Hotel</span>
+                        <span class="opt-sub">Al. Santos, 1.437 · Jardins</span>
+                      </span>
+                      <span class="opt-meta">9,3 km<br>27 min</span>
+                    </span>
+                  </label>
+                </div>
+              </section>
+
+              <section class="block">
+                <p class="eyebrow">Seu carro</p>
+                <div class="carro">
+                  <span class="placa"><span class="br">BR</span><span class="num">FKR2C19</span></span>
+                  <p class="carro-mod">Honda Civic 2021<span>Prata · 4 portas</span></p>
+                </div>
+
+                <p class="chips-lab">Câmbio</p>
+                <div class="chips">
+                  <label class="chip"><input type="radio" name="cambio" id="cambio-auto" value="auto" checked><span>Automático</span></label>
+                  <label class="chip"><input type="radio" name="cambio" id="cambio-manual" value="manual"><span>Manual · +R$ 6</span></label>
+                </div>
+
+                <p class="chips-lab">Onde o carro está agora</p>
+                <div class="chips">
+                  <label class="chip"><input type="radio" name="local" id="local-rua" value="rua" checked><span>Na rua</span></label>
+                  <label class="chip"><input type="radio" name="local" id="local-valet" value="valet"><span>Valet · +R$ 8</span></label>
+                  <label class="chip"><input type="radio" name="local" id="local-estac" value="estac"><span>Estacionamento · +R$ 8</span></label>
+                </div>
+
+                <div class="ticket" id="ticket-wrap" hidden>
+                  <label for="ticket">Número do ticket do valet</label>
+                  <input id="ticket" name="ticket" type="text" inputmode="numeric" autocomplete="off" value="0417" placeholder="0000">
+                </div>
+
+                <p class="nota">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.2"></circle><path d="M8 7.4v4M8 4.9h.01" stroke-linecap="round"></path></svg>
+                  Rodízio municipal: placa de final 9 roda na sexta, das 17h às 20h. Agora são 23h47 — trajeto liberado.
+                </p>
+              </section>
+
+              <section class="block">
+                <p class="eyebrow">Estimativa</p>
+                <ul class="lines">
+                  <li><span>Bandeirada</span><b>R$ 18,00</b></li>
+                  <li><span id="l-km">Distância · 4,1 km × R$ 3,20</span><b id="v-km">R$ 13,12</b></li>
+                  <li><span id="l-min">Tempo · 14 min × R$ 0,90</span><b id="v-min">R$ 12,60</b></li>
+                  <li id="li-manual" hidden><span>Câmbio manual</span><b>R$ 6,00</b></li>
+                  <li id="li-retirada" hidden><span id="l-retirada">Retirada no valet</span><b>R$ 8,00</b></li>
+                </ul>
+                <div class="total"><span>Total estimado</span><b id="v-total">R$ 43,72</b></div>
+                <p class="nota nota--ok">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.8 13.2 4v4.1c0 3-2.1 5.2-5.2 6.1-3.1-.9-5.2-3.1-5.2-6.1V4z"></path><path d="m5.8 8.1 1.6 1.6 3-3.2" stroke-linecap="round"></path></svg>
+                  <span><b>Seguro do seu carro incluso</b> do momento da chave até o destino.</span>
+                </p>
+              </section>
+            </div>
+          </div>
+
+          <div class="ctabar">
+            <button class="cta" id="btn-chamar" type="button">
+              <span class="cta-label" id="cta-label">Chamar motorista</span>
+              <span class="cta-preco" id="cta-preco">R$ 43,72</span>
+            </button>
+            <p class="cta-sub" id="cta-sub" aria-live="polite">Pix ou crédito · espera média de 6 min por aqui</p>
+          </div>
+        </div>
+      </div>
+      <p class="slot-note">O pedido é sobre <em>o seu carro</em>: placa, câmbio e onde ele está parado. Câmbio manual e retirada em valet mudam o preço porque mudam quem pode aceitar a corrida.</p>
+    </figure>
+
+    <!-- ===================== TELA 2 ===================== -->
+    <figure class="slot">
+      <figcaption class="slot-cap"><span class="slot-num">02</span><span class="slot-name">Corrida</span></figcaption>
+
+      <div class="phone">
+        <div class="screen" id="tela-corrida">
+          <div class="notch"></div>
+
+          <div class="statusbar">
+            <span>23:49</span>
+            <span class="sb-icons">
+              <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect y="7.5" width="3" height="3.5" rx="1"></rect><rect x="4.6" y="5" width="3" height="6" rx="1"></rect><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"></rect><rect x="13.8" width="3" height="11" rx="1"></rect></svg>
+              <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1.2 3.7a9.2 9.2 0 0 1 12.6 0"></path><path d="M3.8 6.4a5.6 5.6 0 0 1 7.4 0"></path><path d="M7.5 9.4h.01"></path></svg>
+              <svg width="24" height="11" viewBox="0 0 24 11" aria-hidden="true"><rect x=".6" y=".6" width="19.8" height="9.8" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".5"></rect><rect x="2.3" y="2.3" width="13" height="6.4" rx="1.8" fill="currentColor"></rect><path d="M22.2 3.8v3.4a2.1 2.1 0 0 0 0-3.4z" fill="currentColor" opacity=".5"></path></svg>
+            </span>
+          </div>
+
+          <div class="appbar">
+            <button class="iconbtn" type="button" aria-label="Voltar"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 3.5 5 8l4.5 4.5"></path></svg></button>
+            <span class="appbar-mid"><span class="ride-id">Corrida #8F2C · sexta</span></span>
+            <button class="iconbtn" type="button" aria-label="Ajuda"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"></circle><path d="M6.3 6.2A1.8 1.8 0 0 1 9.7 7c0 1.2-1.7 1.4-1.7 2.6M8 11.9h.01"></path></svg></button>
+          </div>
+
+          <div class="map map--tall">
+            <svg viewBox="0 0 320 210" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa com o trajeto do motorista até o ponto de embarque">
+              <use href="#malha"></use>
+              <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M250 176 V151 H146 V116 H130 V81 H104 V98" stroke="#F2A33C" stroke-width="4.5" opacity=".9"></path>
+                <path d="M250 176 V151 H146 V116 H130 V81 H104 V98" stroke="#FFE2B4" stroke-width="2" stroke-dasharray="6 8" class="rota-anim"></path>
+              </g>
+              <circle cx="104" cy="98" r="14" fill="#F2A33C" opacity=".2" class="pulso"></circle>
+              <circle cx="104" cy="98" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
+              <circle cx="250" cy="176" r="10" fill="#EDF2F8" stroke="#F2A33C" stroke-width="2.5"></circle>
+              <circle cx="250" cy="176" r="3.4" fill="#0F1725"></circle>
+            </svg>
+            <span class="map-badge"><i></i>Rafael está a 1,4 km · Fradique Coutinho</span>
+          </div>
+
+          <div class="scroller">
+            <div class="sheet">
+              <div class="grabber"></div>
+
+              <div class="eta" id="eta-box">
+                <div class="eta-l">
+                  <p>A caminho do embarque</p>
+                  <h3 id="eta-frase">Rafael chega em instantes</h3>
+                </div>
+                <div class="eta-r">
+                  <b id="eta-relogio">04:00</b>
+                  <small>restantes</small>
+                </div>
+              </div>
+
+              <ol class="etapas" id="etapas">
+                <li class="on">A caminho</li>
+                <li>Encontro</li>
+                <li>Em viagem</li>
+                <li>Chegou</li>
+              </ol>
+
+              <div class="motorista">
+                <div class="mot-foto" aria-hidden="true">RN</div>
+                <div class="mot-info">
+                  <h4>Rafael Nogueira</h4>
+                  <span class="nota-mot">
+                    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.6l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.4l-3.8 2 .7-4.3-3.1-3 4.3-.6z"></path></svg>
+                    <b>4,93</b> · 1.284 corridas · 3 anos de app
+                  </span>
+                  <span class="selos">
+                    <span class="selo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.4 3 3 6-6.6"></path></svg>CNH B desde 2009</span>
+                    <span class="selo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.4 3 3 6-6.6"></path></svg>Aprovado em câmbio manual</span>
+                    <span class="selo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.4 3 3 6-6.6"></path></svg>Antecedentes checados</span>
+                  </span>
+                </div>
+              </div>
+
+              <p class="nota">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="4" cy="12.2" r="2"></circle><circle cx="12.6" cy="12.2" r="1.3"></circle><path d="M6 12.2h5.3M5.4 11 9 3.6h2.4"></path></svg>
+                Rafael chega de patinete elétrico dobrável. Ele guarda o patinete no porta-malas do Civic antes de sair.
+              </p>
+
+              <div class="codigo">
+                <p>Confira o código com o Rafael <b>antes</b> de entregar a chave.</p>
+                <span class="digitos" aria-label="Código de início: 4 4 8 2"><span>4</span><span>4</span><span>8</span><span>2</span></span>
+              </div>
+
+              <section class="block">
+                <p class="eyebrow">Carro da corrida</p>
+                <div class="carro">
+                  <span class="placa"><span class="br">BR</span><span class="num">FKR2C19</span></span>
+                  <p class="carro-mod">Honda Civic 2021 prata<span>Embarque na R. Aspicuelta, 440</span></p>
+                </div>
+              </section>
+
+              <div class="acoes">
+                <button class="acao" type="button">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M5.6 2.4 7.2 5.6 5.5 7.3a8.6 8.6 0 0 0 3.2 3.2l1.7-1.7 3.2 1.6v2.4c0 .6-.5 1.1-1.1 1-6-.6-9.4-4-10-10 0-.6.4-1.1 1-1.1z"></path></svg>
+                  Ligar
+                </button>
+                <button class="acao" type="button">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2.4 3.6h11.2v8H7l-3.2 2.6V11.6H2.4z"></path></svg>
+                  Mensagem
+                </button>
+                <button class="acao" type="button">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="3.6" r="2"></circle><circle cx="4" cy="8" r="2"></circle><circle cx="12" cy="12.4" r="2"></circle><path d="m5.8 7 4.4-2.4M5.8 9l4.4 2.4"></path></svg>
+                  Compartilhar
+                </button>
+              </div>
+
+              <div class="seguranca">
+                <span class="seg-li">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.8 13.2 4v4.1c0 3-2.1 5.2-5.2 6.1-3.1-.9-5.2-3.1-5.2-6.1V4z"></path><path d="m5.8 8.1 1.6 1.6 3-3.2" stroke-linecap="round"></path></svg>
+                  <span>Seguro ativo · apólice <span class="mono">PC-88421</span>. Cobre o Civic enquanto o Rafael estiver ao volante.</span>
+                </span>
+                <span class="seg-li">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M8 14.2s5.2-3.4 5.2-7a5.2 5.2 0 1 0-10.4 0c0 3.6 5.2 7 5.2 7z"></path><circle cx="8" cy="7.1" r="1.9"></circle></svg>
+                  <span><b>Bia Machado</b> está acompanhando o trajeto ao vivo desde as 23h48.</span>
+                </span>
+                <span class="seg-li">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"></circle><path d="M8 4.8V8l2.2 1.6"></path></svg>
+                  <span>Se o trajeto sair da rota por mais de <span class="mono">3 min</span>, a central liga para você.</span>
+                </span>
+              </div>
+
+              <button class="cancelar" type="button">Cancelar corrida · grátis por mais 1 min</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="slot-note">Depois de chamar, o que importa é confiança: quem é o motorista, por onde ele vem, o código que destrava a chave e quem está de olho no trajeto do lado de fora.</p>
+    </figure>
+  </main>
+
+  <section class="ops">
+    <h2>Operação — fase 1, São Paulo</h2>
+    <p>Um único polo de atendimento, escolhido pela densidade de bares e pela distância curta até as casas dos clientes. Nada de cobertura da cidade inteira antes de a espera média ficar abaixo de 8 minutos.</p>
+    <dl class="ops-grid">
+      <div class="ops-item">
+        <dt>Área atendida</dt>
+        <dd>Vila Madalena, Pinheiros, Itaim Bibi, Vila Olímpia, Jardins, Baixo Augusta, Perdizes, Moema, Brooklin e Barra Funda.</dd>
+      </div>
+      <div class="ops-item">
+        <dt>Janela</dt>
+        <dd>Quinta a domingo, das <span class="num">19h</span> às <span class="num">05h</span>. Pico entre <span class="num">23h</span> e <span class="num">02h</span>, quando fica em pé <span class="num">70%</span> da frota.</dd>
+      </div>
+      <div class="ops-item">
+        <dt>Tarifa</dt>
+        <dd>Bandeirada <span class="num">R$ 18,00</span> + <span class="num">R$ 3,20</span>/km + <span class="num">R$ 0,90</span>/min. Câmbio manual <span class="num">+R$ 6,00</span>. Retirada em valet ou estacionamento <span class="num">+R$ 8,00</span>. Madrugada, das <span class="num">00h</span> às <span class="num">05h</span>: <span class="num">+20%</span>.</dd>
+      </div>
+      <div class="ops-item">
+        <dt>Motorista</dt>
+        <dd>CNH B definitiva há <span class="num">5</span> anos ou mais, antecedentes checados e teste prático em câmbio manual. Chega de patinete elétrico dobrável, que viaja no porta-malas do cliente.</dd>
+      </div>
+      <div class="ops-item">
+        <dt>Seguro</dt>
+        <dd>Apólice por corrida cobrindo o veículo do cliente enquanto o motorista estiver ao volante, da entrega da chave até o destino.</dd>
+      </div>
+      <div class="ops-item">
+        <dt>O que o app sabe de São Paulo</dt>
+        <dd>Rodízio municipal por final de placa, tickets de valet das casas parceiras e as ruas de bar onde o embarque precisa ser combinado na esquina.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <footer class="rodape">
+    <span>Protótipo de interface · dados e valores ilustrativos</span>
+    <span>Passa a Chave · São Paulo</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var TARIFA = { base: 18, km: 3.20, min: 0.90, manual: 6, retirada: 8 };
+
+  function brl(n) { return 'R$ ' + n.toFixed(2).replace('.', ','); }
+  function dec(n, casas) { return n.toFixed(casas).replace('.', ','); }
+
+  var elKmLab = document.getElementById('l-km');
+  var elKmVal = document.getElementById('v-km');
+  var elMinLab = document.getElementById('l-min');
+  var elMinVal = document.getElementById('v-min');
+  var liManual = document.getElementById('li-manual');
+  var liRetirada = document.getElementById('li-retirada');
+  var labRetirada = document.getElementById('l-retirada');
+  var elTotal = document.getElementById('v-total');
+  var elPreco = document.getElementById('cta-preco');
+  var ticketWrap = document.getElementById('ticket-wrap');
+
+  function marcado(nome) {
+    return document.querySelector('input[name="' + nome + '"]:checked');
+  }
+
+  function recalcular() {
+    var dest = marcado('destino');
+    var km = parseFloat(dest.getAttribute('data-km'));
+    var min = parseInt(dest.getAttribute('data-min'), 10);
+    var manual = marcado('cambio').value === 'manual';
+    var local = marcado('local').value;
+
+    var vKm = km * TARIFA.km;
+    var vMin = min * TARIFA.min;
+    var total = TARIFA.base + vKm + vMin;
+
+    elKmLab.textContent = 'Distância · ' + dec(km, 1) + ' km × R$ 3,20';
+    elKmVal.textContent = brl(vKm);
+    elMinLab.textContent = 'Tempo · ' + min + ' min × R$ 0,90';
+    elMinVal.textContent = brl(vMin);
+
+    liManual.hidden = !manual;
+    if (manual) { total += TARIFA.manual; }
+
+    var retirada = local !== 'rua';
+    liRetirada.hidden = !retirada;
+    if (retirada) {
+      total += TARIFA.retirada;
+      labRetirada.textContent = local === 'valet' ? 'Retirada no valet' : 'Retirada no estacionamento';
+    }
+
+    ticketWrap.hidden = local !== 'valet';
+
+    elTotal.textContent = brl(total);
+    elPreco.textContent = brl(total);
+  }
+
+  var campos = document.querySelectorAll('input[name="destino"], input[name="cambio"], input[name="local"]');
+  for (var i = 0; i < campos.length; i++) {
+    campos[i].addEventListener('change', recalcular);
+  }
+  recalcular();
+
+  /* ---------- contagem regressiva da chegada ---------- */
+  var relogio = document.getElementById('eta-relogio');
+  var frase = document.getElementById('eta-frase');
+  var etapas = document.getElementById('etapas').children;
+  var restam = 240;
+
+  function pintarEta() {
+    if (restam > 0) {
+      var m = Math.floor(restam / 60);
+      var s = restam % 60;
+      relogio.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      frase.textContent = 'Rafael chega em ' + (m > 0 ? m + ' min' : s + ' s');
+    } else {
+      relogio.textContent = '00:00';
+      frase.textContent = 'Rafael chegou — procure o Civic prata';
+      etapas[0].className = 'done';
+      etapas[1].className = 'on';
+    }
+  }
+
+  pintarEta();
+  setInterval(function () {
+    if (restam > 0) { restam--; pintarEta(); }
+  }, 1000);
+
+  /* ---------- chamar motorista ---------- */
+  var botao = document.getElementById('btn-chamar');
+  var rotulo = document.getElementById('cta-label');
+  var sub = document.getElementById('cta-sub');
+  var caixaEta = document.getElementById('eta-box');
+  var ocupado = false;
+
+  botao.addEventListener('click', function () {
+    if (ocupado) { return; }
+    ocupado = true;
+
+    botao.setAttribute('data-estado', 'buscando');
+    rotulo.innerHTML = '<span class="spin"></span>';
+    rotulo.setAttribute('aria-label', 'Procurando motorista');
+    sub.textContent = 'Procurando motorista na Vila Madalena…';
+
+    setTimeout(function () {
+      botao.setAttribute('data-estado', 'achou');
+      rotulo.removeAttribute('aria-label');
+      rotulo.textContent = 'Rafael aceitou a corrida';
+      sub.textContent = 'Acompanhe na tela 02 — chegada em 4 min';
+
+      restam = 240;
+      etapas[0].className = 'on';
+      etapas[1].className = '';
+      pintarEta();
+      caixaEta.classList.remove('flash');
+      void caixaEta.offsetWidth;
+      caixaEta.classList.add('flash');
+
+      setTimeout(function () {
+        botao.removeAttribute('data-estado');
+        rotulo.textContent = 'Chamar motorista';
+        sub.textContent = 'Pix ou crédito · espera média de 6 min por aqui';
+        ocupado = false;
+      }, 2600);
+    }, 1500);
+  });
+})();
+</script>
+</body>
+</html>
