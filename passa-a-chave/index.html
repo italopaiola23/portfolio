@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Protótipo de app em que um motorista avaliado dirige o carro do próprio cliente depois que ele bebeu. Fase 1: São Paulo.">
+<meta name="description" content="Protótipo de app que cruza rotas: quem bebeu e tem carro é levado para casa por alguém que já ia para o mesmo lado e ganha a carona. Fase 1: São Paulo.">
 <style>
   html{color-scheme:light dark}
   :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -107,7 +107,7 @@ body{
 .slot-note{margin:0;padding-left:4px;padding-top:14px;color:var(--muted);font-size:13.5px;text-wrap:pretty}
 
 .phone{width:100%;background:var(--app-bezel);border:1px solid #1b2433;border-radius:46px;padding:11px;box-shadow:var(--phone-shadow)}
-.screen{position:relative;height:664px;border-radius:36px;overflow:hidden;background:var(--app-bg);color:var(--app-text);display:flex;flex-direction:column;font-size:14px}
+.screen{position:relative;height:770px;border-radius:36px;overflow:hidden;background:var(--app-bg);color:var(--app-text);display:flex;flex-direction:column;font-size:14px}
 .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:108px;height:24px;background:var(--app-bezel);border-radius:0 0 15px 15px;z-index:6}
 
 /* ---- barra de status ---- */
@@ -124,13 +124,10 @@ body{
 .avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--app-amber);color:var(--app-amber-ink);font-family:var(--fd);font-weight:700;font-size:14px;flex:none}
 
 /* ---- mapa ---- */
-.map{position:relative;flex:none;overflow:hidden;background:#0C1320}
-.map svg{display:block;width:100%;height:100%}
-.map--band{height:128px}
-.map--tall{height:208px}
-.map-badge{position:absolute;left:12px;bottom:12px;display:flex;align-items:center;gap:7px;background:rgba(15,23,37,.88);border:1px solid var(--app-line);border-radius:999px;padding:5px 11px 5px 8px;font-size:11.5px;color:var(--app-text);backdrop-filter:blur(6px)}
+.map{position:relative;flex:none;height:130px;overflow:hidden;background:#0C1320}
+.map svg{display:block;width:100%;height:auto;margin-top:-18px}
+.map-badge{position:absolute;left:11px;bottom:22px;max-width:calc(100% - 22px);display:flex;align-items:center;gap:7px;background:rgba(15,23,37,.88);border:1px solid var(--app-line);border-radius:999px;padding:5px 11px 5px 8px;font-size:11.5px;color:var(--app-text);backdrop-filter:blur(6px)}
 .map-badge i{width:7px;height:7px;border-radius:50%;background:var(--app-green);font-style:normal;flex:none;box-shadow:0 0 0 3px rgba(87,197,150,.22)}
-.map--tall .map-badge{bottom:auto;top:12px}
 .rota-anim{animation:corre 2.4s linear infinite}
 @keyframes corre{to{stroke-dashoffset:-28}}
 .pulso{transform-box:fill-box;transform-origin:center;animation:pulsa 2.2s ease-out infinite}
@@ -140,7 +137,7 @@ body{
 .scroller{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);scrollbar-width:thin;scrollbar-color:#2B3A50 transparent}
 .scroller::-webkit-scrollbar{width:5px}
 .scroller::-webkit-scrollbar-thumb{background:#2B3A50;border-radius:99px}
-.sheet{background:var(--app-sheet);border-radius:22px 22px 0 0;margin-top:-16px;position:relative;z-index:3;padding:0 15px 30px;display:flex;flex-direction:column;gap:16px}
+.sheet{background:var(--app-sheet);border-radius:22px 22px 0 0;margin-top:-16px;position:relative;z-index:3;padding:0 15px 30px;display:flex;flex-direction:column;gap:14px}
 .grabber{width:38px;height:4px;border-radius:99px;background:#33415A;margin:9px auto 3px}
 .sheet h2{font-family:var(--fd);font-weight:700;font-size:17px;line-height:1.28;letter-spacing:-.015em;margin:0;text-wrap:balance}
 
@@ -148,27 +145,8 @@ body{
 .block{display:block}
 
 /* ---- origem ---- */
-.origem{display:flex;align-items:flex-start;gap:10px;background:var(--app-raise);border:1px solid var(--app-line);border-radius:14px;padding:11px 12px}
-.origem .pin{width:11px;height:11px;border-radius:50%;background:var(--app-amber);margin-top:4px;flex:none;box-shadow:0 0 0 3px rgba(242,163,60,.2)}
-.origem .txt{flex:1;min-width:0}
-.origem .t1{display:block;margin:0;font-weight:600;font-size:14px}
-.origem .t2{display:block;margin:2px 0 0;font-size:12px;color:var(--app-muted)}
-.linkbtn{background:none;border:0;color:var(--app-amber);font-family:var(--fb);font-size:12.5px;font-weight:600;cursor:pointer;padding:2px 0;flex:none}
 
 /* ---- opções de destino ---- */
-.opts{display:flex;flex-direction:column;gap:7px}
-.opt{display:block;cursor:pointer}
-.opt input{position:absolute;opacity:0;width:0;height:0}
-.opt-body{display:flex;align-items:center;gap:10px;border:1px solid var(--app-line);background:var(--app-raise);border-radius:14px;padding:10px 12px;transition:border-color .16s,background .16s}
-.opt input:checked+.opt-body{border-color:var(--app-amber);background:rgba(242,163,60,.09)}
-.opt input:focus-visible+.opt-body{outline:2px solid var(--app-amber);outline-offset:2px}
-.opt-ico{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#111A28;color:var(--app-muted);flex:none}
-.opt input:checked+.opt-body .opt-ico{color:var(--app-amber)}
-.opt-ico svg{width:15px;height:15px}
-.opt-txt{flex:1;min-width:0}
-.opt-name{display:block;font-weight:600;font-size:13.5px}
-.opt-sub{display:block;font-size:11.5px;line-height:1.32;color:var(--app-muted);text-wrap:pretty}
-.opt-meta{font-family:var(--fm);font-size:11px;color:var(--app-muted);text-align:right;line-height:1.45;flex:none;font-variant-numeric:tabular-nums}
 
 /* ---- carro ---- */
 .carro{display:flex;align-items:center;gap:11px;flex-wrap:wrap;background:var(--app-raise);border:1px solid var(--app-line);border-radius:14px;padding:11px 12px}
@@ -179,31 +157,12 @@ body{
 .carro-mod span{display:block;font-size:11.5px;color:var(--app-muted)}
 
 /* ---- fichas (chips) ---- */
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
-.chip{cursor:pointer}
-.chip input{position:absolute;opacity:0;width:0;height:0}
-.chip span{display:inline-block;border:1px solid var(--app-line);background:#111A28;color:var(--app-muted);border-radius:999px;padding:6px 11px;font-size:12px;font-weight:500;transition:border-color .16s,color .16s,background .16s}
-.chip input:checked+span{border-color:var(--app-amber);background:rgba(242,163,60,.12);color:var(--app-amber)}
-.chip input:focus-visible+span{outline:2px solid var(--app-amber);outline-offset:2px}
-.chips-lab{font-size:11.5px;color:var(--app-muted);margin:11px 0 0}
 
-.ticket{margin-top:10px}
-.ticket label{display:block;font-size:11.5px;color:var(--app-muted);margin-bottom:5px}
-.ticket input{width:100%;border:1px solid var(--app-line);background:#111A28;color:var(--app-text);border-radius:11px;padding:9px 11px;font-family:var(--fm);font-size:13px;letter-spacing:.08em}
-.ticket input:focus-visible{outline:2px solid var(--app-amber);outline-offset:1px}
 
 .nota{display:flex;align-items:flex-start;gap:7px;margin:10px 0 0;font-size:11.5px;line-height:1.45;color:var(--app-muted)}
 .nota svg{width:13px;height:13px;flex:none;margin-top:2px}
-.nota--ok{color:var(--app-green)}
-.nota--ok b{color:var(--app-text);font-weight:600}
 
 /* ---- preço ---- */
-.lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.lines li{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;color:var(--app-muted)}
-.lines b{font-family:var(--fm);font-weight:500;color:var(--app-text);font-variant-numeric:tabular-nums;flex:none}
-.total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:11px;padding-top:11px;border-top:1px solid var(--app-line)}
-.total span{font-size:13px;color:var(--app-muted)}
-.total b{font-family:var(--fd);font-weight:800;font-size:23px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 
 /* ---- barra de ação ---- */
 .ctabar{flex:none;background:var(--app-sheet);border-top:1px solid var(--app-line);padding:12px 15px calc(15px + env(safe-area-inset-bottom,0px))}
@@ -222,7 +181,7 @@ body{
 .eta-l p{margin:0;font-size:12px;color:var(--app-muted)}
 .eta-l h3{margin:1px 0 0;font-family:var(--fd);font-weight:700;font-size:16px;letter-spacing:-.01em}
 .eta-r{text-align:right;flex:none}
-.eta-r b{display:block;font-family:var(--fm);font-weight:600;font-size:22px;color:var(--app-amber);font-variant-numeric:tabular-nums;line-height:1.1}
+.eta-r b{display:block;font-family:var(--fm);font-weight:600;font-size:20px;color:var(--app-amber);font-variant-numeric:tabular-nums;line-height:1.1}
 .eta-r small{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--app-muted);font-family:var(--fm)}
 .eta.flash{animation:flasha 1.1s ease-out}
 @keyframes flasha{0%{border-color:var(--app-amber);background:rgba(242,163,60,.2)}100%{border-color:var(--app-line);background:var(--app-raise)}}
@@ -279,11 +238,80 @@ body{
 
 .rodape{margin-top:40px;padding-top:18px;border-top:1px solid var(--line-soft);color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
 
+
+/* ---- rota declarada ---- */
+.rota{display:grid;grid-template-columns:14px 1fr;gap:0 10px;background:var(--app-raise);border:1px solid var(--app-line);border-radius:14px;padding:12px}
+.rota-marca{display:grid;place-items:center;padding-top:5px}
+.rota-marca i{width:9px;height:9px;border-radius:50%;background:var(--app-amber);display:block}
+.rota-marca.fim i{border-radius:2px;background:transparent;border:2.5px solid var(--app-amber)}
+.rota-fio{width:2px;background:repeating-linear-gradient(to bottom,#3A4A63 0 3px,transparent 3px 7px);justify-self:center;min-height:18px;margin:3px 0}
+.rota p{margin:0;font-size:13px;font-weight:600;line-height:1.3}
+.rota p span{display:block;font-weight:400;font-size:11.5px;color:var(--app-muted);margin-top:1px}
+.rota-hora{grid-column:1/-1;display:flex;align-items:flex-start;gap:7px;margin-top:11px;padding-top:10px;border-top:1px solid var(--app-line);font-size:11.5px;line-height:1.4;color:var(--app-muted)}
+.rota-hora svg{width:13px;height:13px;color:var(--app-amber);flex:none;margin-top:1px}
+.rota-hora b{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+
+/* ---- pedidos que casam com a rota ---- */
+.peds{display:flex;flex-direction:column;gap:8px}
+.ped{display:block;cursor:pointer}
+.ped input{position:absolute;opacity:0;width:0;height:0}
+.ped-body{display:block;border:1px solid var(--app-line);background:var(--app-raise);border-radius:15px;padding:11px 12px;transition:border-color .16s,background .16s}
+.ped input:checked+.ped-body{border-color:var(--app-amber);background:rgba(242,163,60,.09)}
+.ped input:focus-visible+.ped-body{outline:2px solid var(--app-amber);outline-offset:2px}
+.ped-topo{display:flex;align-items:center;gap:9px}
+.ped-ini{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#22324A;color:var(--app-text);font-family:var(--fd);font-weight:700;font-size:12.5px;flex:none}
+.ped input:checked+.ped-body .ped-ini{background:var(--app-amber);color:var(--app-amber-ink)}
+.ped-nome{flex:1;min-width:0}
+.ped-nome b{display:block;font-size:13.5px;font-weight:600}
+.ped-nome span{display:block;font-size:11px;color:var(--app-muted);font-family:var(--fm)}
+.ped-valor{flex:none;text-align:right}
+.ped-valor b{display:block;font-family:var(--fm);font-weight:600;font-size:14.5px;color:var(--app-amber);font-variant-numeric:tabular-nums;line-height:1.15}
+.ped-valor span{display:block;font-size:9.5px;color:var(--app-muted);letter-spacing:.03em;margin-top:1px}
+.ped-trecho{display:block;margin:9px 0 0;font-size:11.5px;color:var(--app-muted);line-height:1.4}
+.ped-trecho b{color:var(--app-amber);font-weight:600}
+.mets{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.met{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:4px 7px;font-size:10.5px;background:#111A28;border:1px solid var(--app-line);color:var(--app-muted)}
+.met b{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+.met.bom{border-color:rgba(87,197,150,.4)}
+.met.bom b{color:var(--app-green)}
+.met.ruim{border-color:rgba(239,107,94,.35)}
+.met.ruim b{color:var(--app-red)}
+
+/* ---- porteira da sobriedade ---- */
+.sopro{display:flex;align-items:flex-start;gap:10px;cursor:pointer;border:1px solid rgba(87,197,150,.35);background:rgba(87,197,150,.06);border-radius:15px;padding:12px}
+.sopro input{position:absolute;opacity:0;width:0;height:0}
+.sopro-cx{display:grid;place-items:center;width:20px;height:20px;border-radius:6px;border:1.5px solid #46586F;background:#111A28;flex:none;margin-top:1px;transition:background .16s,border-color .16s}
+.sopro-cx svg{width:12px;height:12px;color:var(--app-amber-ink);opacity:0;transition:opacity .16s}
+.sopro input:checked+.sopro-cx{background:var(--app-green);border-color:var(--app-green)}
+.sopro input:checked+.sopro-cx svg{opacity:1}
+.sopro input:focus-visible+.sopro-cx{outline:2px solid var(--app-green);outline-offset:2px}
+.sopro-txt{font-size:11.5px;line-height:1.45;color:var(--app-muted)}
+.sopro-txt b{color:var(--app-text);font-weight:600}
+.cta:disabled{background:var(--app-raise);color:#5D6B80;cursor:not-allowed}
+.cta:disabled:hover{filter:none}
+
+/* ---- os dois ganhos, lado a lado ---- */
+.ganho{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--app-line);border-radius:16px;overflow:hidden;background:var(--app-raise)}
+.ganho-col{padding:12px 11px;min-width:0}
+.ganho-col+.ganho-col{border-left:1px solid var(--app-line);background:rgba(242,163,60,.05)}
+.ganho-quem{margin:0;font-family:var(--fm);font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--app-muted)}
+.ganho-oque{margin:4px 0 8px;font-family:var(--fd);font-weight:700;font-size:13px;line-height:1.25;letter-spacing:-.01em;text-wrap:balance}
+.ganho-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.ganho-col li{font-size:11px;line-height:1.35;color:var(--app-muted);padding-left:11px;position:relative}
+.ganho-col li::before{content:"";position:absolute;left:0;top:6px;width:4px;height:4px;border-radius:50%;background:var(--app-amber)}
+.ganho-col li b{font-family:var(--fm);font-weight:500;color:var(--app-text)}
+
+.par{display:flex;align-items:flex-start;gap:9px;background:var(--app-raise);border:1px solid var(--app-line);border-radius:14px;padding:11px 12px;font-size:11.5px;color:var(--app-muted);line-height:1.45}
+.par svg{width:15px;height:15px;color:var(--app-amber);flex:none;margin-top:1px}
+.par b{color:var(--app-text);font-weight:600}
+
 @media (max-width:420px){
   .wrap{padding-block:26px 44px}
   .brand b{font-size:23px}
   .stage{gap:34px}
-  .screen{height:620px}
+  .screen{height:700px}
+  .ganho{grid-template-columns:1fr}
+  .ganho-col+.ganho-col{border-left:0;border-top:1px solid var(--app-line)}
   .acoes{grid-template-columns:1fr 1fr}
 }
 </style>
@@ -291,28 +319,25 @@ body{
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
-    <g id="malha">
-      <rect x="-20" y="-20" width="360" height="250" fill="#0C1320"></rect>
-      <g fill="#131D2C">
-        <rect x="4" y="26" width="102" height="50" rx="3"></rect>
-        <rect x="115" y="26" width="85" height="50" rx="3"></rect>
-        <rect x="209" y="26" width="112" height="50" rx="3"></rect>
-        <rect x="4" y="86" width="102" height="60" rx="3"></rect>
-        <rect x="115" y="86" width="85" height="60" rx="3"></rect>
-        <rect x="209" y="86" width="112" height="60" rx="3"></rect>
-        <rect x="4" y="156" width="102" height="56" rx="3"></rect>
-        <rect x="115" y="156" width="85" height="56" rx="3"></rect>
-        <rect x="209" y="156" width="112" height="56" rx="3"></rect>
+    <g id="regiao">
+      <rect x="-20" y="-20" width="360" height="190" fill="#0C1320"></rect>
+      <g stroke="#16283F" fill="none" stroke-linecap="round">
+        <path d="M100 -6 C94 28 92 56 98 82 C104 106 114 126 120 150" stroke-width="7"></path>
+        <path d="M-8 38 C34 34 70 28 98 18" stroke-width="5.5"></path>
       </g>
-      <g stroke="#1C2839" fill="none" stroke-linecap="square">
-        <path d="M-20 81 H340" stroke-width="10"></path>
-        <path d="M110 -20 V230" stroke-width="10"></path>
-        <path d="M-20 151 H340" stroke-width="6"></path>
-        <path d="M204 -20 V230" stroke-width="6"></path>
-        <path d="M-20 21 H340" stroke-width="5"></path>
+      <g stroke="#1C2839" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M306 120 L244 104 L200 90 L154 78 L112 68" stroke-width="7"></path>
+        <path d="M106 66 L60 58 L14 52" stroke-width="5"></path>
+        <path d="M166 80 L174 40 L180 6" stroke-width="4"></path>
+        <path d="M240 106 L256 70 L264 32" stroke-width="3.5"></path>
+        <path d="M40 92 L64 118 L120 130" stroke-width="3.5"></path>
       </g>
-      <path d="M-20 214 L96 118 L214 96 L340 58" stroke="#20304A" stroke-width="8" fill="none" stroke-linejoin="round"></path>
-      <text x="14" y="204" fill="#2E405B" font-family="Azeret Mono, monospace" font-size="9" letter-spacing="1.6">V. MADALENA</text>
+      <g fill="#2E405B" font-family="Azeret Mono, monospace" font-size="7" letter-spacing="1.1">
+        <text x="12" y="44">BUTANTÃ</text>
+        <text x="110" y="102">PINHEIROS</text>
+        <text x="188" y="108">IPIRANGA</text>
+        <text x="214" y="127">SANTO ANDRÉ</text>
+      </g>
     </g>
   </defs>
 </svg>
@@ -326,7 +351,7 @@ body{
         <b>Passa a Chave</b>
       </div>
       <div class="mast-copy">
-        <p>Você bebeu, seu carro fica. Um motorista avaliado chega de patinete dobrável, guarda o patinete no porta-malas e leva você para casa <strong>no seu próprio carro</strong>.</p>
+        <p>Quem bebeu tem carro e não pode dirigir. Outra pessoa vai pro mesmo lado e não tem como voltar. O app cruza as duas rotas: <strong>uma volta em segurança no próprio carro, a outra ganha a carona</strong>.</p>
       </div>
     </div>
     <span class="city"><i></i>São Paulo · fase 1</span>
@@ -334,20 +359,20 @@ body{
 
   <main class="stage">
 
-    <!-- ===================== TELA 1 ===================== -->
+    <!-- ============ TELA 1 — quem dirige ============ -->
     <figure class="slot">
-      <figcaption class="slot-cap"><span class="slot-num">01</span><span class="slot-name">Pedido</span></figcaption>
+      <figcaption class="slot-cap"><span class="slot-num">01</span><span class="slot-name">No celular de quem dirige</span></figcaption>
 
       <div class="phone">
-        <div class="screen" id="tela-pedido">
+        <div class="screen" id="tela-driver">
           <div class="notch"></div>
 
           <div class="statusbar">
-            <span>23:47</span>
+            <span>01:22</span>
             <span class="sb-icons">
               <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect y="7.5" width="3" height="3.5" rx="1"></rect><rect x="4.6" y="5" width="3" height="6" rx="1"></rect><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"></rect><rect x="13.8" width="3" height="11" rx="1"></rect></svg>
               <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1.2 3.7a9.2 9.2 0 0 1 12.6 0"></path><path d="M3.8 6.4a5.6 5.6 0 0 1 7.4 0"></path><path d="M7.5 9.4h.01"></path></svg>
-              <svg width="24" height="11" viewBox="0 0 24 11" aria-hidden="true"><rect x=".6" y=".6" width="19.8" height="9.8" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".5"></rect><rect x="2.3" y="2.3" width="13" height="6.4" rx="1.8" fill="currentColor"></rect><path d="M22.2 3.8v3.4a2.1 2.1 0 0 0 0-3.4z" fill="currentColor" opacity=".5"></path></svg>
+              <svg width="24" height="11" viewBox="0 0 24 11" aria-hidden="true"><rect x=".6" y=".6" width="19.8" height="9.8" rx="3.2" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".5"></rect><rect x="2.3" y="2.3" width="11" height="6.4" rx="1.8" fill="currentColor"></rect><path d="M22.2 3.8v3.4a2.1 2.1 0 0 0 0-3.4z" fill="currentColor" opacity=".5"></path></svg>
             </span>
           </div>
 
@@ -357,151 +382,156 @@ body{
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="8.6" cy="8.6" r="4.4" stroke="currentColor" stroke-width="2.4"></circle><path d="M11.8 11.8 20 20M17.6 17.4l-1.9 1.9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>
               Passa a Chave
             </span>
-            <span class="avatar" aria-hidden="true">Í</span>
+            <span class="avatar" aria-hidden="true">M</span>
           </div>
 
-          <div class="map map--band">
-            <svg viewBox="0 0 320 210" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa da Vila Madalena com motoristas disponíveis por perto">
-              <use href="#malha"></use>
-              <g fill="#F2A33C" opacity=".85">
-                <circle cx="176" cy="58" r="3.4"></circle>
-                <circle cx="52" cy="118" r="3.4"></circle>
-                <circle cx="238" cy="126" r="3.4"></circle>
-                <circle cx="132" cy="176" r="3.4"></circle>
+          <div class="map">
+            <svg viewBox="0 0 320 150" role="img" aria-label="Mapa de São Paulo com a rota declarada de Santo André até o Butantã e três pedidos compatíveis na origem">
+              <use href="#regiao"></use>
+              <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" fill="none" stroke="#F2A33C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".85"></path>
+              <path d="M64 57 L46 50" fill="none" stroke="#93A0B4" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"></path>
+              <circle cx="46" cy="50" r="4" fill="none" stroke="#93A0B4" stroke-width="2"></circle>
+              <circle cx="64" cy="57" r="6.5" fill="#0F1725" stroke="#F2A33C" stroke-width="3"></circle>
+              <g fill="#F2A33C" opacity=".55">
+                <circle cx="268" cy="114" r="4.5"></circle>
+                <circle cx="281" cy="106" r="4.5"></circle>
+                <circle cx="257" cy="121" r="4.5"></circle>
               </g>
-              <circle cx="104" cy="98" r="14" fill="#F2A33C" opacity=".22" class="pulso"></circle>
-              <circle cx="104" cy="98" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
+              <circle id="halo-sel" cx="268" cy="114" r="13" fill="#F2A33C" opacity=".2" class="pulso"></circle>
+              <circle id="dot-sel" cx="268" cy="114" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
+              <circle cx="288" cy="122" r="5.5" fill="#EDF2F8" stroke="#0F1725" stroke-width="2"></circle>
             </svg>
-            <span class="map-badge"><i></i>12 motoristas na Vila Madalena</span>
+            <span class="map-badge"><i></i>3 pedidos na sua rota agora</span>
           </div>
 
           <div class="scroller">
             <div class="sheet">
               <div class="grabber"></div>
-              <h2>Boa noite, Ítalo. Quem leva você pra casa hoje?</h2>
+              <h2>Você vai pro Butantã. Leve alguém que não pode dirigir.</h2>
 
               <section class="block">
-                <p class="eyebrow">Origem</p>
-                <div class="origem">
-                  <span class="pin"></span>
-                  <span class="txt">
-                    <span class="t1">Rua Aspicuelta, 440</span>
-                    <span class="t2">Vila Madalena · confirmado por GPS</span>
-                  </span>
-                  <button class="linkbtn" type="button">Mudar</button>
+                <p class="eyebrow">Sua rota declarada</p>
+                <div class="rota">
+                  <span class="rota-marca"><i></i></span>
+                  <p>Rua Oliveira Lima, 1.220<span>Centro, Santo André · você está aqui</span></p>
+                  <span class="rota-fio"></span>
+                  <span></span>
+                  <span class="rota-marca fim"><i></i></span>
+                  <p>Rua Alvarenga, 2.100<span>Butantã · sua casa</span></p>
+                  <div class="rota-hora">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"></circle><path d="M8 4.8V8l2.2 1.6"></path></svg>
+                    <span>Sai por volta de <b>01h30</b> · sua volta de app: <b>R$ 118</b></span>
+                  </div>
                 </div>
               </section>
 
               <section class="block">
-                <p class="eyebrow">Destino</p>
-                <div class="opts">
-                  <label class="opt">
-                    <input type="radio" name="destino" id="dest-casa" value="casa" data-km="4.1" data-min="14" checked>
-                    <span class="opt-body">
-                      <span class="opt-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"></path><path d="M6.4 13.5V9.6h3.2v3.9"></path></svg></span>
-                      <span class="opt-txt">
-                        <span class="opt-name">Casa</span>
-                        <span class="opt-sub">R. Joaquim Antunes, 812 · Pinheiros</span>
+                <p class="eyebrow">Pedidos que casam com ela</p>
+                <div class="peds">
+
+                  <label class="ped">
+                    <input type="radio" name="pedido" id="ped-ju" checked
+                           data-nome="Juliana" data-km="34.2" data-min="48" data-uber="118"
+                           data-coinc="94" data-sobra="0,9 km" data-sobrac="bom" data-ate="1,1 km"
+                           data-cx="268" data-cy="114">
+                    <span class="ped-body">
+                      <span class="ped-topo">
+                        <span class="ped-ini">JR</span>
+                        <span class="ped-nome"><b>Juliana R.</b><span>4,97 · 38 corridas</span></span>
+                        <span class="ped-valor"><b>R$ 32,36</b><span>+ carona</span></span>
                       </span>
-                      <span class="opt-meta">4,1 km<br>14 min</span>
+                      <span class="ped-trecho">Av. Portugal, 480 · Vila Assunção <b>→</b> Av. Corifeu, 3.400 · Butantã</span>
+                      <span class="mets">
+                        <span class="met bom">coincide <b>94%</b></span>
+                        <span class="met bom">te deixa a <b>0,9 km</b> de casa</span>
+                        <span class="met">carro a <b>1,1 km</b></span>
+                        <span class="met">Civic · automático</span>
+                      </span><b>R$ 32,36</b></span>
                     </span>
                   </label>
-                  <label class="opt">
-                    <input type="radio" name="destino" id="dest-bia" value="bia" data-km="6.8" data-min="21">
-                    <span class="opt-body">
-                      <span class="opt-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="5.4" r="2.8"></circle><path d="M2.8 13.6c.6-2.8 2.7-4.2 5.2-4.2s4.6 1.4 5.2 4.2"></path></svg></span>
-                      <span class="opt-txt">
-                        <span class="opt-name">Casa da Bia</span>
-                        <span class="opt-sub">R. Cardoso de Almeida, 1.140 · Perdizes</span>
+
+                  <label class="ped">
+                    <input type="radio" name="pedido" id="ped-di"
+                           data-nome="Diego" data-km="31.6" data-min="44" data-uber="112"
+                           data-coinc="81" data-sobra="4,8 km" data-sobrac="" data-ate="2,3 km"
+                           data-cx="281" data-cy="106">
+                    <span class="ped-body">
+                      <span class="ped-topo">
+                        <span class="ped-ini">DM</span>
+                        <span class="ped-nome"><b>Diego M.</b><span>4,88 · 12 corridas</span></span>
+                        <span class="ped-valor"><b>R$ 31,18</b><span>+ carona</span></span>
                       </span>
-                      <span class="opt-meta">6,8 km<br>21 min</span>
+                      <span class="ped-trecho">R. das Figueiras, 990 · Centro <b>→</b> R. Ministro Laudo, 210 · Vila Sônia</span>
+                      <span class="mets">
+                        <span class="met">coincide <b>81%</b></span>
+                        <span class="met">te deixa a <b>4,8 km</b> de casa</span>
+                        <span class="met">carro a <b>2,3 km</b></span>
+                        <span class="met">Argo · <b>manual</b></span>
+                      </span><b>R$ 31,18</b></span>
                     </span>
                   </label>
-                  <label class="opt">
-                    <input type="radio" name="destino" id="dest-hotel" value="hotel" data-km="9.3" data-min="27">
-                    <span class="opt-body">
-                      <span class="opt-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M3 13.5v-11h10v11"></path><path d="M1.5 13.5h13"></path><path d="M6 5.6h1.2M8.8 5.6H10M6 8.2h1.2M8.8 8.2H10"></path></svg></span>
-                      <span class="opt-txt">
-                        <span class="opt-name">Hotel</span>
-                        <span class="opt-sub">Al. Santos, 1.437 · Jardins</span>
+
+                  <label class="ped">
+                    <input type="radio" name="pedido" id="ped-pa"
+                           data-nome="Paula" data-km="27.9" data-min="40" data-uber="96"
+                           data-coinc="72" data-sobra="6,2 km" data-sobrac="ruim" data-ate="0,6 km"
+                           data-cx="257" data-cy="121">
+                    <span class="ped-body">
+                      <span class="ped-topo">
+                        <span class="ped-ini">PV</span>
+                        <span class="ped-nome"><b>Paula V.</b><span>5,00 · 61 corridas</span></span>
+                        <span class="ped-valor"><b>R$ 29,50</b><span>+ carona</span></span>
                       </span>
-                      <span class="opt-meta">9,3 km<br>27 min</span>
+                      <span class="ped-trecho">R. Campos Sales, 140 · Bairro Jardim <b>→</b> R. Mourato Coelho, 800 · Pinheiros</span>
+                      <span class="mets">
+                        <span class="met">coincide <b>72%</b></span>
+                        <span class="met ruim">te deixa a <b>6,2 km</b> de casa</span>
+                        <span class="met bom">carro a <b>0,6 km</b></span>
+                        <span class="met">Polo · automático</span>
+                      </span><b>R$ 29,50</b></span>
                     </span>
                   </label>
+
                 </div>
               </section>
 
               <section class="block">
-                <p class="eyebrow">Seu carro</p>
-                <div class="carro">
-                  <span class="placa"><span class="br">BR</span><span class="num">FKR2C19</span></span>
-                  <p class="carro-mod">Honda Civic 2021<span>Prata · 4 portas</span></p>
-                </div>
-
-                <p class="chips-lab">Câmbio</p>
-                <div class="chips">
-                  <label class="chip"><input type="radio" name="cambio" id="cambio-auto" value="auto" checked><span>Automático</span></label>
-                  <label class="chip"><input type="radio" name="cambio" id="cambio-manual" value="manual"><span>Manual · +R$ 6</span></label>
-                </div>
-
-                <p class="chips-lab">Onde o carro está agora</p>
-                <div class="chips">
-                  <label class="chip"><input type="radio" name="local" id="local-rua" value="rua" checked><span>Na rua</span></label>
-                  <label class="chip"><input type="radio" name="local" id="local-valet" value="valet"><span>Valet · +R$ 8</span></label>
-                  <label class="chip"><input type="radio" name="local" id="local-estac" value="estac"><span>Estacionamento · +R$ 8</span></label>
-                </div>
-
-                <div class="ticket" id="ticket-wrap" hidden>
-                  <label for="ticket">Número do ticket do valet</label>
-                  <input id="ticket" name="ticket" type="text" inputmode="numeric" autocomplete="off" value="0417" placeholder="0000">
-                </div>
-
+                <p class="eyebrow">Antes de aceitar</p>
+                <label class="sopro">
+                  <input type="checkbox" id="sobrio" checked>
+                  <span class="sopro-cx"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.4 3 3 6-6.6"></path></svg></span>
+                  <span class="sopro-txt"><b>Não bebi hoje e estou em condições de dirigir.</b> A declaração fica registrada com data e hora, e vale para o carro de outra pessoa. Denúncia confirmada encerra a conta.</span>
+                </label>
                 <p class="nota">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.2"></circle><path d="M8 7.4v4M8 4.9h.01" stroke-linecap="round"></path></svg>
-                  Rodízio municipal: placa de final 9 roda na sexta, das 17h às 20h. Agora são 23h47 — trajeto liberado.
-                </p>
-              </section>
-
-              <section class="block">
-                <p class="eyebrow">Estimativa</p>
-                <ul class="lines">
-                  <li><span>Bandeirada</span><b>R$ 18,00</b></li>
-                  <li><span id="l-km">Distância · 4,1 km × R$ 3,20</span><b id="v-km">R$ 13,12</b></li>
-                  <li><span id="l-min">Tempo · 14 min × R$ 0,90</span><b id="v-min">R$ 12,60</b></li>
-                  <li id="li-manual" hidden><span>Câmbio manual</span><b>R$ 6,00</b></li>
-                  <li id="li-retirada" hidden><span id="l-retirada">Retirada no valet</span><b>R$ 8,00</b></li>
-                </ul>
-                <div class="total"><span>Total estimado</span><b id="v-total">R$ 43,72</b></div>
-                <p class="nota nota--ok">
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.8 13.2 4v4.1c0 3-2.1 5.2-5.2 6.1-3.1-.9-5.2-3.1-5.2-6.1V4z"></path><path d="m5.8 8.1 1.6 1.6 3-3.2" stroke-linecap="round"></path></svg>
-                  <span><b>Seguro do seu carro incluso</b> do momento da chave até o destino.</span>
+                  Nas casas parceiras o bafômetro fica no caixa. Sopro negativo nos últimos 60 min vira selo no seu perfil.
                 </p>
               </section>
             </div>
           </div>
 
           <div class="ctabar">
-            <button class="cta" id="btn-chamar" type="button">
-              <span class="cta-label" id="cta-label">Chamar motorista</span>
-              <span class="cta-preco" id="cta-preco">R$ 43,72</span>
+            <button class="cta" id="btn-aceitar" type="button">
+              <span class="cta-label" id="cta-label">Aceitar · Juliana</span>
+              <span class="cta-preco" id="cta-preco">R$ 32,36</span>
             </button>
-            <p class="cta-sub" id="cta-sub" aria-live="polite">Pix ou crédito · espera média de 6 min por aqui</p>
+            <p class="cta-sub" id="cta-sub" aria-live="polite">Você anda 1,1 km até o carro · recebe no Pix ao fim da corrida</p>
           </div>
         </div>
       </div>
-      <p class="slot-note">O pedido é sobre <em>o seu carro</em>: placa, câmbio e onde ele está parado. Câmbio manual e retirada em valet mudam o preço porque mudam quem pode aceitar a corrida.</p>
+      <p class="slot-note">Quem dirige não é frota: é alguém que já ia embora pro mesmo lado. Por isso a tela decide por três números — o quanto a rota coincide, onde ele é largado no fim e quanto tem que andar até o carro.</p>
     </figure>
 
-    <!-- ===================== TELA 2 ===================== -->
+    <!-- ============ TELA 2 — quem bebeu ============ -->
     <figure class="slot">
-      <figcaption class="slot-cap"><span class="slot-num">02</span><span class="slot-name">Corrida</span></figcaption>
+      <figcaption class="slot-cap"><span class="slot-num">02</span><span class="slot-name">No celular de quem deixa o carro</span></figcaption>
 
       <div class="phone">
-        <div class="screen" id="tela-corrida">
+        <div class="screen" id="tela-dona">
           <div class="notch"></div>
 
           <div class="statusbar">
-            <span>23:49</span>
+            <span>01:26</span>
             <span class="sb-icons">
               <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor" aria-hidden="true"><rect y="7.5" width="3" height="3.5" rx="1"></rect><rect x="4.6" y="5" width="3" height="6" rx="1"></rect><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"></rect><rect x="13.8" width="3" height="11" rx="1"></rect></svg>
               <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1.2 3.7a9.2 9.2 0 0 1 12.6 0"></path><path d="M3.8 6.4a5.6 5.6 0 0 1 7.4 0"></path><path d="M7.5 9.4h.01"></path></svg>
@@ -511,23 +541,26 @@ body{
 
           <div class="appbar">
             <button class="iconbtn" type="button" aria-label="Voltar"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 3.5 5 8l4.5 4.5"></path></svg></button>
-            <span class="appbar-mid"><span class="ride-id">Corrida #8F2C · sexta</span></span>
+            <span class="appbar-mid"><span class="ride-id">Par #8F2C · sábado, 01h26</span></span>
             <button class="iconbtn" type="button" aria-label="Ajuda"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"></circle><path d="M6.3 6.2A1.8 1.8 0 0 1 9.7 7c0 1.2-1.7 1.4-1.7 2.6M8 11.9h.01"></path></svg></button>
           </div>
 
-          <div class="map map--tall">
-            <svg viewBox="0 0 320 210" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Mapa com o trajeto do motorista até o ponto de embarque">
-              <use href="#malha"></use>
+          <div class="map">
+            <svg viewBox="0 0 320 150" role="img" aria-label="Mapa com o trecho comum entre a viagem de Juliana e a volta de Marcos, de Santo André ao Butantã">
+              <use href="#regiao"></use>
               <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M250 176 V151 H146 V116 H130 V81 H104 V98" stroke="#F2A33C" stroke-width="4.5" opacity=".9"></path>
-                <path d="M250 176 V151 H146 V116 H130 V81 H104 V98" stroke="#FFE2B4" stroke-width="2" stroke-dasharray="6 8" class="rota-anim"></path>
+                <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" stroke="#F2A33C" stroke-width="4.5" opacity=".9"></path>
+                <path d="M268 114 L244 104 L200 90 L154 78 L112 68 L64 57" stroke="#FFE2B4" stroke-width="2" stroke-dasharray="6 8" class="rota-anim"></path>
+                <path d="M288 122 L268 114" stroke="#93A0B4" stroke-width="2" stroke-dasharray="4 4"></path>
+                <path d="M64 57 L46 50" stroke="#93A0B4" stroke-width="2" stroke-dasharray="4 4"></path>
               </g>
-              <circle cx="104" cy="98" r="14" fill="#F2A33C" opacity=".2" class="pulso"></circle>
-              <circle cx="104" cy="98" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
-              <circle cx="250" cy="176" r="10" fill="#EDF2F8" stroke="#F2A33C" stroke-width="2.5"></circle>
-              <circle cx="250" cy="176" r="3.4" fill="#0F1725"></circle>
+              <circle cx="46" cy="50" r="4" fill="none" stroke="#93A0B4" stroke-width="2"></circle>
+              <circle cx="64" cy="57" r="6.5" fill="#0F1725" stroke="#F2A33C" stroke-width="3"></circle>
+              <circle cx="268" cy="114" r="13" fill="#F2A33C" opacity=".2" class="pulso"></circle>
+              <circle cx="268" cy="114" r="7" fill="#F2A33C" stroke="#0F1725" stroke-width="2.5"></circle>
+              <circle cx="288" cy="122" r="6.5" fill="#EDF2F8" stroke="#F2A33C" stroke-width="2.5"></circle>
             </svg>
-            <span class="map-badge"><i></i>Rafael está a 1,4 km · Fradique Coutinho</span>
+            <span class="map-badge"><i></i>34,2 km · 48 min · 94% em comum</span>
           </div>
 
           <div class="scroller">
@@ -536,53 +569,77 @@ body{
 
               <div class="eta" id="eta-box">
                 <div class="eta-l">
-                  <p>A caminho do embarque</p>
-                  <h3 id="eta-frase">Rafael chega em instantes</h3>
+                  <p>Marcos aceitou e vem a pé</p>
+                  <h3 id="eta-frase">Chega em instantes</h3>
                 </div>
                 <div class="eta-r">
-                  <b id="eta-relogio">04:00</b>
+                  <b id="eta-relogio">13:00</b>
                   <small>restantes</small>
                 </div>
               </div>
 
               <ol class="etapas" id="etapas">
-                <li class="on">A caminho</li>
+                <li class="on">Vindo</li>
                 <li>Encontro</li>
                 <li>Em viagem</li>
                 <li>Chegou</li>
               </ol>
 
+              <section class="block">
+                <p class="eyebrow">Por que esse par existe</p>
+                <div class="ganho">
+                  <div class="ganho-col">
+                    <p class="ganho-quem">Você</p>
+                    <p class="ganho-oque">Chega em casa dentro do seu próprio carro</p>
+                    <ul>
+                      <li>Paga <b>R$ 46,23</b> no lugar de <b>R$ 118</b> de app</li>
+                      <li>O Civic amanhece na sua garagem, não na Vila Assunção</li>
+                      <li>Ninguém dirige depois de beber</li>
+                    </ul>
+                  </div>
+                  <div class="ganho-col">
+                    <p class="ganho-quem">Marcos</p>
+                    <p class="ganho-oque">Volta pro Butantã, onde já estava indo</p>
+                    <ul>
+                      <li>Deixa de gastar <b>R$ 118</b> na própria volta</li>
+                      <li>Recebe <b>R$ 32,36</b> pela direção</li>
+                      <li>Desce a <b>0,9 km</b> da porta de casa</li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
               <div class="motorista">
-                <div class="mot-foto" aria-hidden="true">RN</div>
+                <div class="mot-foto" aria-hidden="true">MS</div>
                 <div class="mot-info">
-                  <h4>Rafael Nogueira</h4>
+                  <h4>Marcos Serrano</h4>
                   <span class="nota-mot">
                     <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.6l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.4l-3.8 2 .7-4.3-3.1-3 4.3-.6z"></path></svg>
-                    <b>4,93</b> · 1.284 corridas · 3 anos de app
+                    <span><b>4,91</b> · 46 caronas dirigindo</span>
                   </span>
                   <span class="selos">
-                    <span class="selo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.4 3 3 6-6.6"></path></svg>CNH B desde 2009</span>
-                    <span class="selo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.4 3 3 6-6.6"></path></svg>Aprovado em câmbio manual</span>
+                    <span class="selo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.4 3 3 6-6.6"></path></svg>Sopro negativo às 01h19</span>
+                    <span class="selo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.4 3 3 6-6.6"></path></svg>CNH B desde 2012</span>
                     <span class="selo"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.4 3 3 6-6.6"></path></svg>Antecedentes checados</span>
                   </span>
                 </div>
               </div>
 
-              <p class="nota">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="4" cy="12.2" r="2"></circle><circle cx="12.6" cy="12.2" r="1.3"></circle><path d="M6 12.2h5.3M5.4 11 9 3.6h2.4"></path></svg>
-                Rafael chega de patinete elétrico dobrável. Ele guarda o patinete no porta-malas do Civic antes de sair.
-              </p>
+              <div class="par">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5.6h7.4M6.4 3 9.4 5.6 6.4 8.2"></path><path d="M14 10.4H6.6M9.6 13l-3-2.6 3-2.6"></path></svg>
+                <span>Ele mora na <b>R. Alvarenga, 2.100</b>. Seu destino é a <b>Av. Corifeu, 3.400</b>. As duas pontas caem no mesmo bairro — é isso que faz o par fechar.</span>
+              </div>
 
               <div class="codigo">
-                <p>Confira o código com o Rafael <b>antes</b> de entregar a chave.</p>
+                <p>Confira o código com o Marcos <b>antes</b> de entregar a chave.</p>
                 <span class="digitos" aria-label="Código de início: 4 4 8 2"><span>4</span><span>4</span><span>8</span><span>2</span></span>
               </div>
 
               <section class="block">
-                <p class="eyebrow">Carro da corrida</p>
+                <p class="eyebrow">Seu carro</p>
                 <div class="carro">
                   <span class="placa"><span class="br">BR</span><span class="num">FKR2C19</span></span>
-                  <p class="carro-mod">Honda Civic 2021 prata<span>Embarque na R. Aspicuelta, 440</span></p>
+                  <p class="carro-mod">Honda Civic 2021 prata<span>Parado na Av. Portugal, 480 · Vila Assunção</span></p>
                 </div>
               </section>
 
@@ -604,54 +661,54 @@ body{
               <div class="seguranca">
                 <span class="seg-li">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.8 13.2 4v4.1c0 3-2.1 5.2-5.2 6.1-3.1-.9-5.2-3.1-5.2-6.1V4z"></path><path d="m5.8 8.1 1.6 1.6 3-3.2" stroke-linecap="round"></path></svg>
-                  <span>Seguro ativo · apólice <span class="mono">PC-88421</span>. Cobre o Civic enquanto o Rafael estiver ao volante.</span>
+                  <span>Seguro ativo · apólice <span class="mono">PC-88421</span>, condutor eventual. Cobre o Civic da entrega da chave até a Av. Corifeu.</span>
                 </span>
                 <span class="seg-li">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M8 14.2s5.2-3.4 5.2-7a5.2 5.2 0 1 0-10.4 0c0 3.6 5.2 7 5.2 7z"></path><circle cx="8" cy="7.1" r="1.9"></circle></svg>
-                  <span><b>Bia Machado</b> está acompanhando o trajeto ao vivo desde as 23h48.</span>
+                  <span><b>Bia Machado</b> está acompanhando o trajeto ao vivo desde as 01h25.</span>
                 </span>
                 <span class="seg-li">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"></circle><path d="M8 4.8V8l2.2 1.6"></path></svg>
-                  <span>Se o trajeto sair da rota por mais de <span class="mono">3 min</span>, a central liga para você.</span>
+                  <span>Se o carro sair da rota combinada por mais de <span class="mono">3 min</span>, a central liga para você.</span>
                 </span>
               </div>
 
-              <button class="cancelar" type="button">Cancelar corrida · grátis por mais 1 min</button>
+              <button class="cancelar" type="button">Cancelar o par · grátis por mais 1 min</button>
             </div>
           </div>
         </div>
       </div>
-      <p class="slot-note">Depois de chamar, o que importa é confiança: quem é o motorista, por onde ele vem, o código que destrava a chave e quem está de olho no trajeto do lado de fora.</p>
+      <p class="slot-note">Do outro lado, o que precisa ficar visível é o acordo: quanto cada um ganha, que o Marcos soprou o bafômetro sete minutos atrás e que ele desce a 900 m da própria casa — o motivo pelo qual ele não vai querer desviar.</p>
     </figure>
   </main>
 
   <section class="ops">
-    <h2>Operação — fase 1, São Paulo</h2>
-    <p>Um único polo de atendimento, escolhido pela densidade de bares e pela distância curta até as casas dos clientes. Nada de cobertura da cidade inteira antes de a espera média ficar abaixo de 8 minutos.</p>
+    <h2>Como o par se forma — fase 1, São Paulo</h2>
+    <p>O produto não é uma frota, é um cruzamento de rotas. Ele só existe quando duas pessoas, na mesma região e no mesmo horário, vão para o mesmo lado — uma com carro e sem condições de dirigir, outra sem carro e sem como voltar.</p>
     <dl class="ops-grid">
       <div class="ops-item">
-        <dt>Área atendida</dt>
-        <dd>Vila Madalena, Pinheiros, Itaim Bibi, Vila Olímpia, Jardins, Baixo Augusta, Perdizes, Moema, Brooklin e Barra Funda.</dd>
+        <dt>O cruzamento</dt>
+        <dd>Quem dirige declara a rota e o horário aproximado de saída. O app oferece só os pedidos cujo trecho comum passa de <span class="num">70%</span>, ordenados por quanto sobra de caminho depois da entrega.</dd>
       </div>
       <div class="ops-item">
-        <dt>Janela</dt>
-        <dd>Quinta a domingo, das <span class="num">19h</span> às <span class="num">05h</span>. Pico entre <span class="num">23h</span> e <span class="num">02h</span>, quando fica em pé <span class="num">70%</span> da frota.</dd>
+        <dt>Os três números</dt>
+        <dd>Coincidência de rota, distância a pé até o carro e a ponta que sobra no fim. São eles que decidem o par, não a proximidade imediata.</dd>
       </div>
       <div class="ops-item">
-        <dt>Tarifa</dt>
-        <dd>Bandeirada <span class="num">R$ 18,00</span> + <span class="num">R$ 3,20</span>/km + <span class="num">R$ 0,90</span>/min. Câmbio manual <span class="num">+R$ 6,00</span>. Retirada em valet ou estacionamento <span class="num">+R$ 8,00</span>. Madrugada, das <span class="num">00h</span> às <span class="num">05h</span>: <span class="num">+20%</span>.</dd>
+        <dt>Quem paga o quê</dt>
+        <dd>Taxa fixa <span class="num">R$ 24,00</span> + <span class="num">R$ 0,65</span>/km, paga por quem deixa o carro. <span class="num">70%</span> vai para quem dirige, <span class="num">30%</span> para a plataforma. Combustível e pedágio são do dono do carro.</dd>
       </div>
       <div class="ops-item">
-        <dt>Motorista</dt>
-        <dd>CNH B definitiva há <span class="num">5</span> anos ou mais, antecedentes checados e teste prático em câmbio manual. Chega de patinete elétrico dobrável, que viaja no porta-malas do cliente.</dd>
+        <dt>Sobriedade de quem dirige</dt>
+        <dd>Declaração registrada com horário a cada aceite e bafômetro nas casas parceiras, que vira selo válido por <span class="num">60</span> min. Toda denúncia confirmada encerra a conta.</dd>
       </div>
       <div class="ops-item">
-        <dt>Seguro</dt>
-        <dd>Apólice por corrida cobrindo o veículo do cliente enquanto o motorista estiver ao volante, da entrega da chave até o destino.</dd>
+        <dt>Habilitação e seguro</dt>
+        <dd>CNH B definitiva há <span class="num">5</span> anos ou mais, antecedentes checados e teste prático em câmbio manual. Apólice por corrida, na cláusula de condutor eventual, cobrindo o carro do cliente.</dd>
       </div>
       <div class="ops-item">
-        <dt>O que o app sabe de São Paulo</dt>
-        <dd>Rodízio municipal por final de placa, tickets de valet das casas parceiras e as ruas de bar onde o embarque precisa ser combinado na esquina.</dd>
+        <dt>Eixos da fase 1</dt>
+        <dd>Trajetos longos e caros de madrugada, onde a economia dos dois lados é maior: ABC ↔ zona oeste, Zona Leste ↔ centro e Alphaville ↔ Pinheiros. Quinta a domingo, das <span class="num">19h</span> às <span class="num">05h</span>.</dd>
       </div>
     </dl>
   </section>
@@ -664,79 +721,100 @@ body{
 
 <script>
 (function () {
-  var TARIFA = { base: 18, km: 3.20, min: 0.90, manual: 6, retirada: 8 };
+  var TARIFA = { fixa: 24, km: 0.65, repasse: 0.70 };
 
   function brl(n) { return 'R$ ' + n.toFixed(2).replace('.', ','); }
-  function dec(n, casas) { return n.toFixed(casas).replace('.', ','); }
 
-  var elKmLab = document.getElementById('l-km');
-  var elKmVal = document.getElementById('v-km');
-  var elMinLab = document.getElementById('l-min');
-  var elMinVal = document.getElementById('v-min');
-  var liManual = document.getElementById('li-manual');
-  var liRetirada = document.getElementById('li-retirada');
-  var labRetirada = document.getElementById('l-retirada');
-  var elTotal = document.getElementById('v-total');
-  var elPreco = document.getElementById('cta-preco');
-  var ticketWrap = document.getElementById('ticket-wrap');
+  var rotulo = document.getElementById('cta-label');
+  var preco = document.getElementById('cta-preco');
+  var sub = document.getElementById('cta-sub');
+  var botao = document.getElementById('btn-aceitar');
+  var sobrio = document.getElementById('sobrio');
+  var dotSel = document.getElementById('dot-sel');
+  var haloSel = document.getElementById('halo-sel');
 
-  function marcado(nome) {
-    return document.querySelector('input[name="' + nome + '"]:checked');
+  function escolhido() {
+    return document.querySelector('input[name="pedido"]:checked');
   }
 
-  function recalcular() {
-    var dest = marcado('destino');
-    var km = parseFloat(dest.getAttribute('data-km'));
-    var min = parseInt(dest.getAttribute('data-min'), 10);
-    var manual = marcado('cambio').value === 'manual';
-    var local = marcado('local').value;
+  function subPadrao(p) {
+    return 'Você anda ' + p.getAttribute('data-ate') + ' até o carro · recebe no Pix ao fim da corrida';
+  }
 
-    var vKm = km * TARIFA.km;
-    var vMin = min * TARIFA.min;
-    var total = TARIFA.base + vKm + vMin;
+  function atualizar() {
+    var p = escolhido();
+    var km = parseFloat(p.getAttribute('data-km'));
+    var recebe = (TARIFA.fixa + km * TARIFA.km) * TARIFA.repasse;
 
-    elKmLab.textContent = 'Distância · ' + dec(km, 1) + ' km × R$ 3,20';
-    elKmVal.textContent = brl(vKm);
-    elMinLab.textContent = 'Tempo · ' + min + ' min × R$ 0,90';
-    elMinVal.textContent = brl(vMin);
+    rotulo.textContent = 'Aceitar · ' + p.getAttribute('data-nome');
+    preco.textContent = brl(recebe);
+    sub.textContent = subPadrao(p);
 
-    liManual.hidden = !manual;
-    if (manual) { total += TARIFA.manual; }
+    dotSel.setAttribute('cx', p.getAttribute('data-cx'));
+    dotSel.setAttribute('cy', p.getAttribute('data-cy'));
+    haloSel.setAttribute('cx', p.getAttribute('data-cx'));
+    haloSel.setAttribute('cy', p.getAttribute('data-cy'));
+  }
 
-    var retirada = local !== 'rua';
-    liRetirada.hidden = !retirada;
-    if (retirada) {
-      total += TARIFA.retirada;
-      labRetirada.textContent = local === 'valet' ? 'Retirada no valet' : 'Retirada no estacionamento';
+  var pedidos = document.querySelectorAll('input[name="pedido"]');
+  for (var i = 0; i < pedidos.length; i++) {
+    pedidos[i].addEventListener('change', atualizar);
+  }
+
+  function porteira() {
+    botao.disabled = !sobrio.checked;
+    if (!sobrio.checked) {
+      sub.textContent = 'Confirme a declaração de sobriedade para aceitar um pedido.';
+    } else {
+      sub.textContent = subPadrao(escolhido());
     }
-
-    ticketWrap.hidden = local !== 'valet';
-
-    elTotal.textContent = brl(total);
-    elPreco.textContent = brl(total);
   }
+  sobrio.addEventListener('change', porteira);
 
-  var campos = document.querySelectorAll('input[name="destino"], input[name="cambio"], input[name="local"]');
-  for (var i = 0; i < campos.length; i++) {
-    campos[i].addEventListener('change', recalcular);
-  }
-  recalcular();
+  atualizar();
+  porteira();
 
-  /* ---------- contagem regressiva da chegada ---------- */
+  var ocupado = false;
+  botao.addEventListener('click', function () {
+    if (ocupado || botao.disabled) { return; }
+    ocupado = true;
+    var p = escolhido();
+
+    botao.setAttribute('data-estado', 'buscando');
+    rotulo.innerHTML = '<span class="spin"></span>';
+    rotulo.setAttribute('aria-label', 'Confirmando o par');
+    sub.textContent = 'Avisando ' + p.getAttribute('data-nome') + '…';
+
+    setTimeout(function () {
+      botao.setAttribute('data-estado', 'achou');
+      rotulo.removeAttribute('aria-label');
+      rotulo.textContent = 'Par fechado · vá até o carro';
+      sub.textContent = p.getAttribute('data-nome') + ' está esperando · ' + p.getAttribute('data-ate') + ' a pé';
+
+      setTimeout(function () {
+        botao.removeAttribute('data-estado');
+        ocupado = false;
+        atualizar();
+        porteira();
+      }, 2800);
+    }, 1500);
+  });
+
+  /* ---------- tela 2: contagem até o encontro ---------- */
   var relogio = document.getElementById('eta-relogio');
   var frase = document.getElementById('eta-frase');
   var etapas = document.getElementById('etapas').children;
-  var restam = 240;
+  var restam = 780;
 
   function pintarEta() {
     if (restam > 0) {
       var m = Math.floor(restam / 60);
       var s = restam % 60;
       relogio.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-      frase.textContent = 'Rafael chega em ' + (m > 0 ? m + ' min' : s + ' s');
+      frase.textContent = 'Chega em ' + (m > 0 ? m + ' min' : s + ' s');
     } else {
       relogio.textContent = '00:00';
-      frase.textContent = 'Rafael chegou — procure o Civic prata';
+      frase.textContent = 'Marcos chegou · confira o código';
       etapas[0].className = 'done';
       etapas[1].className = 'on';
     }
@@ -746,45 +824,6 @@ body{
   setInterval(function () {
     if (restam > 0) { restam--; pintarEta(); }
   }, 1000);
-
-  /* ---------- chamar motorista ---------- */
-  var botao = document.getElementById('btn-chamar');
-  var rotulo = document.getElementById('cta-label');
-  var sub = document.getElementById('cta-sub');
-  var caixaEta = document.getElementById('eta-box');
-  var ocupado = false;
-
-  botao.addEventListener('click', function () {
-    if (ocupado) { return; }
-    ocupado = true;
-
-    botao.setAttribute('data-estado', 'buscando');
-    rotulo.innerHTML = '<span class="spin"></span>';
-    rotulo.setAttribute('aria-label', 'Procurando motorista');
-    sub.textContent = 'Procurando motorista na Vila Madalena…';
-
-    setTimeout(function () {
-      botao.setAttribute('data-estado', 'achou');
-      rotulo.removeAttribute('aria-label');
-      rotulo.textContent = 'Rafael aceitou a corrida';
-      sub.textContent = 'Acompanhe na tela 02 — chegada em 4 min';
-
-      restam = 240;
-      etapas[0].className = 'on';
-      etapas[1].className = '';
-      pintarEta();
-      caixaEta.classList.remove('flash');
-      void caixaEta.offsetWidth;
-      caixaEta.classList.add('flash');
-
-      setTimeout(function () {
-        botao.removeAttribute('data-estado');
-        rotulo.textContent = 'Chamar motorista';
-        sub.textContent = 'Pix ou crédito · espera média de 6 min por aqui';
-        ocupado = false;
-      }, 2600);
-    }, 1500);
-  });
 })();
 </script>
 </body>
